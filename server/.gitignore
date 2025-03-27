@@ -1,0 +1,9 @@
+#api-gateway service
+api-gateway/node_modules
+api-gateway/uploads/*
+api-gateway/.env
+
+
+#worker-service
+worker-service/node_modules
+worker-service/.env
