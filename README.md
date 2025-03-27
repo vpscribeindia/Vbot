@@ -7,7 +7,18 @@ MICROSERVICE START
    docker start my-redis
 2) api-gateway service start - ./server/api-gateway/
    npm start
+   .env should be
+
+   PORT=3000
+   REDIS_URL=redis://127.0.0.1:6379
+   APP_ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+
 3) worker-service start - ./server/worker-service/
    npm start
+   .env should be
+
+   REDIS_URL=redis://127.0.0.1:6379
+   GEMINI_API_KEY=
+   DEEPGRAM_API_KEY=
 
 (*** NOTE : FIRST CONFIGURE .env files with your api keys ***)
