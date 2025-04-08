@@ -1,9 +1,12 @@
 #api-gateway service
 api-gateway/node_modules
-api-gateway/uploads/*
+api-gateway/app/files-transcriptions/uploads/*
 api-gateway/.env
 
+#api-gateway service
+database-service/node_modules
 
 #worker-service
 worker-service/node_modules
+worker-service/logs
 worker-service/.env

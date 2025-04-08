@@ -6,9 +6,10 @@ const cacheController = require("express-cache-controller");
 const cors = require("cors");
 const http = require('http');
 const socketIo = require('socket.io');
-const fileRoutes = require('./routes/fileRoute');
-const errorHandler = require('./middlewares/errorHandler');
-const setupSocket = require('./services/socketService');
+const fileRoutes = require('./app/files-transcriptions/routes/fileRoute');
+const transcriptRoutes = require('./app/files-transcriptions/routes/transcriptRoute');
+const errorHandler = require('./app/files-transcriptions/middlewares/errorHandler'); 
+const setupSocket = require('./app/files-transcriptions/services/socketService');
 const app = express();
 const allowedOrigins = process.env.APP_ALLOWED_ORIGINS.split(",");
 
@@ -20,7 +21,7 @@ const corsOptions = {
       callback(new Error("CORS not allowed from this origin"));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "DELETE", "PUT"],
   allowedHeaders: ["Content-Type", "Authorization"],
 };
 
@@ -28,17 +29,21 @@ app.use(cors(corsOptions));
 
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: { origin: '*' }
+  cors: corsOptions 
 });
 
 // Middleware for JSON body parsing
-app.use(express.static("./uploads"));
+app.use(express.static("./app/files-transcriptions/uploads"));
 app.use(bodyParser.json());
 app.use(compression());
-app.use(cacheController({ maxAge: 60 }));
+app.use(cacheController({ maxAge: 0 }));
 // Mount API routes
 
+//file routes
 app.use('/api', fileRoutes);
+//transcript routes
+app.use('/api', transcriptRoutes);
+
 
 // Global error handler
 app.use(errorHandler);

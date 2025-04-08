@@ -1,33 +1,71 @@
 require('dotenv').config();
 const { Worker } = require('bullmq');
+const Path = require('path');
 const { transcribeAudio } = require('./services/deepgramService');
-const { normalizeAudio } = require('./services/audioConversion');
+const { templateTranscript } = require('./services/templateService');
+const { compressAudio, highQualityAudio, getAudioDuration } = require('./services/audioConversion');
 const redisConnection = require('./config/redis');
 const redisPub = require('./config/redis');
+const { File,Transcript } = require('./config/db');
 
 async function processJob(job) {
-  const { filePath} = job.data;
-  let convertedFilePath;
+  const { filePath,fileId } = job.data;
+  let convertedFilePath,finalTranscript;
   try {
     
-    redisPub.publish('progress', JSON.stringify({ fileId:job.id, status: 'Converting audio' }));
+    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Converting audio' }));
     // Convert audio to 16kHz WAV
-    convertedFilePath = await normalizeAudio(filePath);
+    convertedFilePath = await highQualityAudio(filePath);
     
-    redisPub.publish('progress', JSON.stringify({ fileId:job.id, status: 'Audio conversion complete' }));
+    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Audio conversion complete' }));
     // Transcribe audio with Deepgram
     const rawTranscript = await transcribeAudio(convertedFilePath, process.env.DEEPGRAM_API_KEY);
-    redisPub.publish('progress', JSON.stringify({ fileId:job.id, status: 'Transcription complete' }));
-  
+    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Transcription complete' }));
+    await File.update({ status: 'processing' }, { where: { id:fileId } });
+
+    // Use Gemini to format the transcript
+    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
+    const customTemplate = `
+You are a medical AI assistant. Extract structured clinical notes in **SOAP format**.
+
+### **Input:**
+{transcription}
+
+### **Output Guidelines:**
+- **Strictly** use the exact headings enclosed in **square brackets** (e.g., **[Subjective]**, **[Objective]**).  
+- Do **not** use markdown-style headings like "##".
+- Keep responses **structured and formatted** properly.
+
+### **SOAP Notes Output:**
+[Visit Summary]  
+[Subjective]  
+[Objective]  
+[Assessment]  
+[Plan]  
+[Patient Instructions]  
+[Transcript Summary]  
+`;
+
+    finalTranscript = await templateTranscript(rawTranscript,customTemplate, process.env.GEMINI_API_KEY);
+ 
+    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Compressing Audio' }));
+    const compressedFile=await compressAudio(convertedFilePath);
+    const duration=await getAudioDuration(compressedFile);
+
+    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Saving Audio' }));
+    const fileName=Path.basename(compressedFile);
+    await File.update({ fileName: fileName, duration: duration,  status: 'completed' }, { where: { id:fileId } });
+    await Transcript.create({ fileId:fileId, content: finalTranscript});
        // Publish final progress update
        redisPub.publish('progress', JSON.stringify({
-        fileId:job.id,
+        fileId:fileId,
         status: 'completed',
-        transcript:rawTranscript
+        duration: duration,
+        fileName:fileName
       }));
-    return { transcript: rawTranscript };
   } catch (error) {
     console.error(`Job ${job.id} failed:`, error);
+    await File.update({ status: 'failed' }, { where: { id:fileId } });
     throw error;
   }
 }

@@ -1,15 +1,13 @@
+import Dashboard from "./pages/Dashboard";
+import { motion } from "framer-motion";
 import './App.css'
-import Dashboard from './pages/Dashboard';
+ 
 function App() {
-  const handleUpload = (files) => {
-    console.log('Files to upload:', files);
-  };
-
   return (
-    <div className="bg-gray-100 flex items-center justify-center">
-      <Dashboard onUpload={handleUpload} />
-    </div>
+    <motion.div className="container mx-auto px-6 py-8 h-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+      <Dashboard />
+      </motion.div>
   );
 }
 
-export default App
+export default App;
