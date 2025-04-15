@@ -10,16 +10,19 @@ const db = { sequelize, File, Transcript, User, Userinfo, Billing };
 
 async function initializeDatabase() {
   try {
-    File.hasOne(Transcript, { foreignKey: 'fileId' });
-    Transcript.belongsTo(File, { foreignKey: 'fileId' });
-    User.hasMany(Userinfo, { foreignKey: 'user_id' });
-    Userinfo.belongsTo(User, { foreignKey: 'user_id' });
-
+    
+    User.hasMany(File, { foreignKey: 'user_id' });
+    File.belongsTo(User, { foreignKey: 'user_id' });
+    
     User.hasMany(Billing, { foreignKey: 'user_id' });
     Billing.belongsTo(User, { foreignKey: 'user_id' });
-
-    User.hasMany(File, { foreignKey: 'user_id' }); // You had `fileId` here but it should be `user_id`
-    File.belongsTo(User, { foreignKey: 'user_id' });
+    
+    File.hasOne(Transcript, { foreignKey: 'fileId' });
+    Transcript.belongsTo(File, { foreignKey: 'fileId' });
+    
+    User.hasOne(Userinfo, { foreignKey: 'user_id' });
+    Userinfo.belongsTo(User, { foreignKey: 'user_id' });
+    
 
 
 
