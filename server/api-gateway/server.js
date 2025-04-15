@@ -1,14 +1,22 @@
 require('dotenv').config();
 const express = require('express');
+const passport = require("passport");
 const bodyParser = require("body-parser");
 const compression = require("compression");
+const session = require("express-session");
 const cacheController = require("express-cache-controller");
 const cors = require("cors");
 const http = require('http');
 const socketIo = require('socket.io');
 const fileRoutes = require('./app/files-transcriptions/routes/fileRoute');
 const transcriptRoutes = require('./app/files-transcriptions/routes/transcriptRoute');
-const errorHandler = require('./app/files-transcriptions/middlewares/errorHandler'); 
+const authRoutes = require('./app/authenticator/google/routes/authRoute');
+const questionRoutes = require('./app/question/routes/questionRoute');
+const userRoutes = require('./app/user/routes/userRoute');
+const billingRoutes = require('./app/billing/routes/billingRouter');
+
+
+const errorHandler = require('./app/files-transcriptions/middlewares/errorHandler');
 const setupSocket = require('./app/files-transcriptions/services/socketService');
 const app = express();
 const allowedOrigins = process.env.APP_ALLOWED_ORIGINS.split(",");
@@ -29,7 +37,7 @@ app.use(cors(corsOptions));
 
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: corsOptions 
+  cors: corsOptions
 });
 
 // Middleware for JSON body parsing
@@ -39,10 +47,33 @@ app.use(compression());
 app.use(cacheController({ maxAge: 0 }));
 // Mount API routes
 
+// Express session configuration
+app.use(
+  session({
+    secret: "secret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Home Page
+app.get("/googlelogin", (req, res) => {
+  res.send("<a href='/auth/google'>Sign Up with Google</a><br><a href='/auth/google'>Sign In with Google</a>");
+});
+
 //file routes
 app.use('/api', fileRoutes);
 //transcript routes
 app.use('/api', transcriptRoutes);
+
+//authRoutes
+app.use('/api', authRoutes);
+app.use('/api', questionRoutes);
+app.use('/api', userRoutes);
+app.use('/api', billingRoutes);
 
 
 // Global error handler
