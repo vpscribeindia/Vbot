@@ -9,6 +9,8 @@ import ReactAudioPlayer from 'react-audio-player';
 const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
+//only for testing purpose
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkxMmYzY2Q4LTA5ZDctNGRkZi05NzcxLTg3OGMwMjVhMzAwYiIsImVtYWlsIjoiam9obkBnbWFpbC5jb20iLCJpYXQiOjE3NDQ4MjY0NDYsImV4cCI6MTc0NDgzMDA0Nn0.xjlhqMWJxdJP6kI2x6IX5cjQKWWVYlc6-d65uDxMD1U";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -68,6 +70,10 @@ const Dashboard = () => {
       await axios.put(UPDATE_TRANSCRIPT_URL, {
         fileId: selectedJob,
         transcript: changedFields, 
+      },{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
       setChangedFields({});
     } catch (error) {
@@ -79,7 +85,12 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const { data } = await axios.get(GET_ALL_FILES_URL);
+        const { data } = await axios.get(GET_ALL_FILES_URL, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
         setJobStatuses(data);
       } catch (error) {
         console.error("Error fetching files:", error);
@@ -125,8 +136,12 @@ const Dashboard = () => {
 
     try {
       const { data } = await axios.post(API_URL, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",  
+          Authorization: `Bearer ${token}`, 
+        },
       });
+      
 
       setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
       setUploadStatus("Upload successful!");
@@ -145,7 +160,11 @@ const Dashboard = () => {
     setEditedTranscript({});
 
     try {
-      const { data } = await axios.get(`${PROGRESS_API_URL}/${fileId}`);
+      const { data } = await axios.get(`${PROGRESS_API_URL}/${fileId}`,{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       setSelectedTranscript(data.transcript || "No transcript available.");
     } catch (error) {
       console.error("Error fetching transcript:", error);
@@ -187,7 +206,11 @@ const Dashboard = () => {
       audioChunksRef.current = [];
 
       try {
-        const { data } = await axios.post(API_URL, formData);
+        const { data } = await axios.post(API_URL, formData,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          }
+        });
         setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
 
       } catch (error) {
@@ -199,7 +222,11 @@ const Dashboard = () => {
 
   const handleDelete = async (fileId) => {
     try {
-      await axios.delete(`${DELETE_FILE}/${fileId}`);
+      await axios.delete(`${DELETE_FILE}/${fileId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
   
       setJobStatuses((prev) => prev.filter((job) => job.fileId !== fileId));
       setSelectedTranscript(null);

@@ -16,7 +16,9 @@ const userRoutes = require('./app/user/routes/userRoute');
 const billingRoutes = require('./app/billing/routes/billingRouter');
 
 
-const errorHandler = require('./app/files-transcriptions/middlewares/errorHandler');
+const errorHandler = require('./middlewares/errorHandler');
+const authenticate = require('./middlewares/authHandler');
+
 const setupSocket = require('./app/files-transcriptions/services/socketService');
 const app = express();
 const allowedOrigins = process.env.APP_ALLOWED_ORIGINS.split(",");
@@ -65,9 +67,9 @@ app.get("/googlelogin", (req, res) => {
 });
 
 //file routes
-app.use('/api', fileRoutes);
+app.use('/api', authenticate, fileRoutes);
 //transcript routes
-app.use('/api', transcriptRoutes);
+app.use('/api', authenticate, transcriptRoutes);
 
 //authRoutes
 app.use('/api', authRoutes);

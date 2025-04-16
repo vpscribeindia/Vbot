@@ -2,7 +2,6 @@ const express = require('express');
 const multer = require('multer');
 const path = require('path');
 const { getFileProgress, getAllFiles, deleteFile, uploadFile } = require("../controllers/fileController");
-
 const router = express.Router();
 const upload = multer({ dest: path.join(__dirname, '../uploads') });
 
