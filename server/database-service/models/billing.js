@@ -2,6 +2,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/sequelize');
 
 const Billing = sequelize.define("Billing", {
+    id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
     user_id: {
         type: DataTypes.UUID,
         references: { model: 'Users', key: 'id' }

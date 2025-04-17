@@ -1,44 +1,83 @@
-const { File, Transcript } = require("../../../config/db");
+const { File, Transcript, Billing, Op } = require("../../../config/db");
 const { addFileJob } = require('../services/queueService');
 const Path = require("path");
 const fs = require('fs');
 
+const { getAudioDuration } = require('../services/fileService'); 
+const { parseUsageLimit, subtractUsageLimit } = require('../utils/limitUtils');
+
 async function uploadFile(req, res, next) {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
 
     if (!req.user || !req.user.id) {
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
+  
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+
 
     const { path } = req.file;
     const fileName = Path.basename(path);
-    const userId = req.user.id; 
+    const userId = req.user.id;
 
+    const activeBilling = await Billing.findOne({
+      where: {
+        user_id: userId,
+        status: 'paid',
+        package_end_date: { [Op.gt]: new Date() }
+      },
+      order: [['package_start_date', 'DESC']]
+    });
+
+    if (!activeBilling) {
+      const msg = `No active billing found for user`;
+      if (fs.existsSync(path)) {
+        fs.unlinkSync(path);
+      }
+      return res.status(401).json({ error: msg });
+    }
+
+    const maxSeconds = parseUsageLimit(activeBilling.usage_limit);
+    const actualDuration = await getAudioDuration(path);
+
+    if (actualDuration > maxSeconds) {
+      const msg = `Audio too long (${actualDuration}s), exceeds billing quota (${maxSeconds}s).`;
+      if (fs.existsSync(path)) {
+        fs.unlinkSync(path);
+      }
+      return res.status(401).json({ error: msg });
+    }
+
+  
     const file = await File.create({
-      fileName,
+      fileName: fileName,
       status: 'queued',
       user_id: userId
     });
 
     const jobData = {
       fileId: file.id,
-      filePath: path
+      filePath: path,
+      actualDuration: actualDuration,
     };
 
     await addFileJob(jobData);
-
     res.status(202).json({
       status: 'File queued for processing',
       fileId: file.id
     });
 
+    const updatedLimit = subtractUsageLimit(activeBilling.usage_limit, actualDuration);
+    await Billing.update({ usage_limit: updatedLimit }, { where: { id: activeBilling.id } });
+
   } catch (error) {
     next(error);
   }
 }
+
 
 async function getFileProgress(req, res) {
   try {

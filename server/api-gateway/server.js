@@ -15,9 +15,7 @@ const questionRoutes = require('./app/question/routes/questionRoute');
 const userRoutes = require('./app/user/routes/userRoute');
 const billingRoutes = require('./app/billing/routes/billingRouter');
 
-
 const errorHandler = require('./middlewares/errorHandler');
-const authenticate = require('./middlewares/authHandler');
 
 const setupSocket = require('./app/files-transcriptions/services/socketService');
 const app = express();
@@ -67,9 +65,9 @@ app.get("/googlelogin", (req, res) => {
 });
 
 //file routes
-app.use('/api', authenticate, fileRoutes);
+app.use('/api', fileRoutes);
 //transcript routes
-app.use('/api', authenticate, transcriptRoutes);
+app.use('/api', transcriptRoutes);
 
 //authRoutes
 app.use('/api', authRoutes);

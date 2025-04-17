@@ -10,7 +10,7 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
 //only for testing purpose
-const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjkxMmYzY2Q4LTA5ZDctNGRkZi05NzcxLTg3OGMwMjVhMzAwYiIsImVtYWlsIjoiam9obkBnbWFpbC5jb20iLCJpYXQiOjE3NDQ4MjY0NDYsImV4cCI6MTc0NDgzMDA0Nn0.xjlhqMWJxdJP6kI2x6IX5cjQKWWVYlc6-d65uDxMD1U";
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZWNkMjUzLTY4MTUtNGZhOS1iZjIzLTRkZDg3MTJiZDgzNyIsImVtYWlsIjoiam9obkBnbWFpbC5jb20iLCJpYXQiOjE3NDQ5MDIwNjUsImV4cCI6MTc0NDkwNTY2NX0.B0LzRKe2DcYS3MRQwE5bUAQzTRE0w4jl8xUJgQ-qqfw";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
