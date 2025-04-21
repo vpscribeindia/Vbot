@@ -11,7 +11,7 @@ const { File, Transcript } = require('./config/db');
 
 
 async function processJob(job) {
-  const { filePath, fileId, actualDuration } = job.data;
+  const { filePath, fileId, actualDuration, patientName } = job.data;
   let convertedFilePath, finalTranscript;
 
   try {
@@ -19,7 +19,7 @@ async function processJob(job) {
     convertedFilePath = await highQualityAudio(filePath);
 
     redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Audio conversion complete' }));
-    const rawTranscript = await transcribeAudio(convertedFilePath, process.env.DEEPGRAM_API_KEY);
+    const {rawTranscript, conversationTranscript} = await transcribeAudio(convertedFilePath, process.env.DEEPGRAM_API_KEY);
     redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Transcription complete' }));
     await File.update({ status: 'processing' }, { where: { id: fileId } });
 
@@ -52,13 +52,14 @@ You are a medical AI assistant. Extract structured clinical notes in **SOAP form
 
     redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Saving Audio' }));
     await File.update({ fileName:fileName, duration: actualDuration, status: 'completed' }, { where: { id: fileId } });
-    await Transcript.create({ fileId:fileId, content: finalTranscript });
+    await Transcript.create({ fileId:fileId, patientName:patientName, content: finalTranscript, rawContent: rawTranscript, conversationContent: conversationTranscript });
 
     redisPub.publish('progress', JSON.stringify({
       fileId:fileId,
       status: 'completed',
       duration: actualDuration,
-      fileName:fileName
+      fileName:fileName,
+      PatientName:patientName
     }));
 
   } catch (error) {

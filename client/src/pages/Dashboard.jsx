@@ -10,11 +10,12 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
 //only for testing purpose
-const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZWNkMjUzLTY4MTUtNGZhOS1iZjIzLTRkZDg3MTJiZDgzNyIsImVtYWlsIjoiam9obkBnbWFpbC5jb20iLCJpYXQiOjE3NDQ5MDIwNjUsImV4cCI6MTc0NDkwNTY2NX0.B0LzRKe2DcYS3MRQwE5bUAQzTRE0w4jl8xUJgQ-qqfw";
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZWNkMjUzLTY4MTUtNGZhOS1iZjIzLTRkZDg3MTJiZDgzNyIsImVtYWlsIjoiam9obkBnbWFpbC5jb20iLCJpYXQiOjE3NDUyNTc5ODQsImV4cCI6MTc0NTI2MTU4NH0.rktrlkNKS9wOoyIhLAVnjuow8V1WeuNZg7rGz4KnUw8";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const [uploadStatus, setUploadStatus] = useState("");
+  const [PatientName, setPatientName] = useState("");
   const [jobStatuses, setJobStatuses] = useState([]);
   const [selectedJob, setSelectedJob] = useState(null);
   const [selectedTranscript, setSelectedTranscript] = useState(null);
@@ -26,6 +27,7 @@ const Dashboard = () => {
   const [editingIndex, setEditingIndex] = useState(null);
   const [expandAll, setExpandAll] = useState(false);
   const [expandedIndexes, setExpandedIndexes] = useState(new Set());
+  const [conversationTranscript, setConversationTranscript] = useState(null);
 
 
   const API_URL = `${API_MAIN_URL}/api/transcribe`;
@@ -119,20 +121,24 @@ const Dashboard = () => {
 
 
   const handleFileChange = (e) => {
-    setSelectedFiles(Array.from(e.target.files));
+    const file = e.target.files[0];
+    if (file) {
+        setSelectedFiles([file]);
+    }
     setUploadStatus("");
 
   };
  
   const handleUpload = async () => {
-    if (selectedFiles.length === 0) return;
+    if (selectedFiles.length === 0 || PatientName === "") return;
     setUploadStatus("Uploading and processing...");
     if (fileInputRef.current) {
         fileInputRef.current.value = null; 
       }
 
     const formData = new FormData();
-    selectedFiles.forEach((file) => formData.append("audioFiles", file));
+    formData.append("audioFiles", selectedFiles[0]);
+    formData.append("patientName", PatientName);
 
     try {
       const { data } = await axios.post(API_URL, formData, {
@@ -146,6 +152,7 @@ const Dashboard = () => {
       setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
       setUploadStatus("Upload successful!");
       setSelectedFiles([]);
+      setPatientName("");
     } catch (error) {
       console.error("Error uploading files:", error);
       setUploadStatus("Upload failed. Please try again.");
@@ -166,6 +173,7 @@ const Dashboard = () => {
         },
       });
       setSelectedTranscript(data.transcript || "No transcript available.");
+      setConversationTranscript(data.conversationTranscript || "No conversation transcript available.");
     } catch (error) {
       console.error("Error fetching transcript:", error);
       setSelectedTranscript("Failed to fetch transcript.");
@@ -294,7 +302,23 @@ const handleTranscriptChange = (e, sectionIndex) => {
 
 };
 
-  
+const formatTranscript = (data) => {
+  // Create an array to hold the formatted strings
+  const formattedStrings = [];
+
+  // Iterate over each speaker object
+  data.forEach((speakerObj) => {
+    Object.entries(speakerObj).forEach(([speaker, sentences]) => {
+      sentences.forEach(({ text, startTime, endTime }) => {
+        // Capture each formatted string and push it to the array
+        formattedStrings.push(`${speaker} (${startTime}-${endTime})=> ${text}`);
+      });
+    });
+  });
+
+  // Return the array of formatted strings
+  return formattedStrings;
+};
   
   
   return (
@@ -325,6 +349,7 @@ const handleTranscriptChange = (e, sectionIndex) => {
                       onClick={() => handleJobClick(job.fileId)}
                       className="p-3 flex flex-col gap-2"
                     >
+                        <Box sx={{ typography: "h6",gutterBottom:true }}>{job.PatientName}</Box>
                       <div className="flex items-center gap-3">
                         <ReactAudioPlayer src={`${API_MAIN_URL}/${job.fileName}`} controls />
                       </div>
@@ -391,7 +416,20 @@ const handleTranscriptChange = (e, sectionIndex) => {
           <Card className="shadow-md rounded-lg sticky top-0 z-50">
             <CardContent>
               <Box sx={{ typography: "h6",fontWeight: "bold",textTransform: 'uppercase',gutterBottom:true }} >Upload & Transcribe</Box>
+
               <div className="flex flex-row gap-2 space-y-2 mt-4">
+              <TextField
+                autoFocus
+                name="heading"
+                sx={{ "& .MuiInputBase-input": { fontWeight: "bold", fontSize: "18px" } }}
+                fullWidth
+                value={PatientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                variant="filled"
+                id="filled-basic"
+                label="Patient Name"
+                className="mt-2 bg-gray-100 rounded-lg"
+              />
               <input className="block w-full border border-gray-300 rounded-lg p-2" ref={fileInputRef} type="file" onChange={handleFileChange} />
               
                 <Button variant="contained" color="primary" onClick={handleUpload} className="w-full mx-2">Upload</Button>
@@ -485,7 +523,32 @@ const handleTranscriptChange = (e, sectionIndex) => {
     </CardContent>
   </Card>
 )}
+     
+ {conversationTranscript && (
+  <Card className="p-4 shadow-md rounded-lg">
+     <Box
+        sx={{
+          typography: "h6",
+          fontWeight: "bold",
+          textTransform: "uppercase",
+          gutterBottom: true,
+        }}
+      >
+        CONVERSATION
+      </Box>
+  <CardContent>
+    {formatTranscript(conversationTranscript).map((formattedText, index) => {
+      const [speakerTime, text] = formattedText.split('=>');
+      return (
+        <p key={index}>
+          <strong>{speakerTime}:</strong> {text}
+        </p>
+      );
+    })}
+  </CardContent>
+</Card>
 
+)}
 
         </div>
       </div>

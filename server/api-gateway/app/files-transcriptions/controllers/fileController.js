@@ -22,6 +22,8 @@ async function uploadFile(req, res, next) {
     const { path } = req.file;
     const fileName = Path.basename(path);
     const userId = req.user.id;
+    const patientName = req.body.patientName;
+
 
     const activeBilling = await Billing.findOne({
       where: {
@@ -62,6 +64,7 @@ async function uploadFile(req, res, next) {
       fileId: file.id,
       filePath: path,
       actualDuration: actualDuration,
+      patientName: patientName,
     };
 
     await addFileJob(jobData);
@@ -84,7 +87,7 @@ async function getFileProgress(req, res) {
     const { fileId } = req.params;
     const file = await File.findOne({
       where: { id: fileId },
-      include: [{ model: Transcript, attributes: ["content"] }],
+      include: [{ model: Transcript, attributes: ["content","conversationContent"] }],
     });
 
     if (!file) {
@@ -93,6 +96,7 @@ async function getFileProgress(req, res) {
 
     res.json({
       transcript: file.Transcript ? file.Transcript.content : null,
+      conversationTranscript: file.Transcript ? file.Transcript.conversationContent : null,
     });
   } catch (error) {
     console.error("Error fetching progress:", error);
@@ -107,17 +111,32 @@ async function getAllFiles(req, res) {
     }
 
     const jobs = await File.findAll({
-      where: { user_id: req.user.id }, 
+      where: { user_id: req.user.id },
       attributes: [["id", "fileId"], "status", "duration", "fileName"],
+      include: [
+        {
+          model: Transcript,
+          attributes: ["patientName"]
+        }
+      ],
       order: [["createdAt", "DESC"]],
     });
 
-    res.json(jobs);
+    const formattedJobs = jobs.map((job) => {
+      const jobData = job.toJSON();
+      return {
+        ...jobData,
+        PatientName: jobData.Transcript?.patientName || null,
+      };
+    });
+
+    res.json(formattedJobs);
   } catch (error) {
     console.error("Error fetching jobs:", error);
     res.status(500).json({ error: "Failed to fetch jobs" });
   }
 }
+
 
 async function deleteFile(req, res) {
   const { fileId } = req.params;

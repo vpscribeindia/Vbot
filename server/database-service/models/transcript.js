@@ -7,7 +7,10 @@ const Transcript = sequelize.define('Transcript', {
     type: DataTypes.UUID,
     references: { model: 'Files', key: 'id' }
   },
-  content: { type: DataTypes.JSON, allowNull: false }
+  patientName: { type: DataTypes.STRING, allowNull: true },
+  content: { type: DataTypes.JSON, allowNull: false },
+  rawContent: { type: DataTypes.TEXT('long'), allowNull: true },
+  conversationContent: { type: DataTypes.JSON, allowNull: true },
 });
 
 module.exports = Transcript;
