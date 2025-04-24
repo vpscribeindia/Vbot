@@ -10,7 +10,7 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
 //only for testing purpose
-const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmNWI2MzI3LTQ1YTEtNDI4MC05MzMwLTdhN2I0NmVhYmI4ZCIsImVtYWlsIjoiaGVsbG93b3JsZEBnbWFpbC5jb20iLCJpYXQiOjE3NDU1MTg2MzQsImV4cCI6MTc0NTUyMjIzNH0.i9XzjaFGo8eWsJdcsfm1ClVrmR7heklMGmj12Om6Eww";
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmNWI2MzI3LTQ1YTEtNDI4MC05MzMwLTdhN2I0NmVhYmI4ZCIsImVtYWlsIjoiaGVsbG93b3JsZEBnbWFpbC5jb20iLCJpYXQiOjE3NDU1MjI4OTEsImV4cCI6MTc0NTUyNjQ5MX0.gLbVaTfg6_7qKEaGsBzheGiRk2Y8ZYLuzm8NQ-echV8";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -375,33 +375,6 @@ const Dashboard = () => {
   };
   
   
-  const parseJSONTranscript = (flattenedTranscript) => {
-    if (!flattenedTranscript || typeof flattenedTranscript !== 'object') return [];
-    const result = [];
-    Object.keys(flattenedTranscript).forEach((key) => {
-      const match = key.match(/^(\d+)_heading$/);
-      if (match) {
-        const index = Number(match[1]);
-        const heading = flattenedTranscript[`${index}_heading`].trim();
-        const text = flattenedTranscript[`${index}_text`]
-          ? flattenedTranscript[`${index}_text`].trim()
-          : "";
-        result.push({ index, heading, text });
-      }
-    });
-    return result.sort((a, b) => a.index - b.index);
-  };
-  
-  
-  const uniqueSections = selectedTranscript
-  ? Array.from(
-      new Map(parseJSONTranscript(selectedTranscript).map(item => [item.index, item])).values()
-    )
-  : [];
-
-  
-  
-  
 
   const convertTime=(seconds)=> {
     if (seconds < 60) return `${seconds} sec`;
@@ -438,26 +411,62 @@ const handleTranscriptChange = (e, sectionIndex) => {
 
 };
 
-const formatTranscript = (data) => {
-  if (!Array.isArray(data)) {
-    console.warn("Expected an array but got:", data);
-    return [];
-  }
-
+const formatTranscript = (parsedConversationTranscript) => {
   const formattedStrings = [];
 
-  data.forEach((speakerObj) => {
+  // Iterate over each speaker object
+  parsedConversationTranscript.forEach((speakerObj) => {
     Object.entries(speakerObj).forEach(([speaker, sentences]) => {
-      if (Array.isArray(sentences)) {
-        sentences.forEach(({ text, startTime, endTime }) => {
-          formattedStrings.push(`${speaker} (${startTime}-${endTime}) => ${text}`);
-        });
-      }
+      sentences.forEach(({ text, startTime, endTime }) => {
+        // Format the string and push it to the array
+        formattedStrings.push(`${speaker} (${startTime}-${endTime}) => ${text}`);
+      });
     });
   });
 
   return formattedStrings;
 };
+
+// Safe JSON parser
+const safeJSONParse = (input) => {
+  try {
+    return typeof input === 'string' ? JSON.parse(input) : input;
+  } catch (e) {
+    console.error("JSON parse failed:", e);
+    return null;
+  }
+};
+
+// Parse incoming data
+const parsedTranscript = safeJSONParse(selectedTranscript);  // Parse selectedTranscript
+
+// Parse and extract sections from transcript
+const parseJSONTranscript = (flattenedTranscript) => {
+  if (!flattenedTranscript || typeof flattenedTranscript !== 'object') return [];
+  const result = [];
+
+  Object.keys(flattenedTranscript).forEach((key) => {
+    const match = key.match(/^(\d+)_heading$/);
+    if (match) {
+      const index = Number(match[1]);
+      const heading = flattenedTranscript[`${index}_heading`].trim();
+      const text = flattenedTranscript[`${index}_text`]
+        ? flattenedTranscript[`${index}_text`].trim()
+        : "";
+      result.push({ index, heading, text });
+    }
+  });
+
+  return result.sort((a, b) => a.index - b.index);
+};
+
+// Extract unique sections
+const uniqueSections = parsedTranscript
+  ? Array.from(
+      new Map(parseJSONTranscript(parsedTranscript).map(item => [item.index, item])).values()
+    )
+  : [];
+
 
   
   
@@ -760,7 +769,7 @@ const formatTranscript = (data) => {
         CONVERSATION
       </Box>
   <CardContent>
-    {formatTranscript(conversationTranscript).map((formattedText, index) => {
+    {formatTranscript(safeJSONParse(conversationTranscript)).map((formattedText, index) => {
       const [speakerTime, text] = formattedText.split('=>');
       return (
         <p key={index}>
