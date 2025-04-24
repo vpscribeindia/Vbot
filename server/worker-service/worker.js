@@ -6,12 +6,10 @@ const { templateTranscript } = require('./services/templateService');
 const { compressAudio, highQualityAudio } = require('./services/audioConversion');
 const redisConnection = require('./config/redis');
 const redisPub = require('./config/redis');
-const { File, Transcript } = require('./config/db');
-
-
+const { File, Transcript, Template } = require('./config/db');
 
 async function processJob(job) {
-  const { filePath, fileId, actualDuration, patientName } = job.data;
+  const { filePath, fileId, actualDuration, patientName, template_name } = job.data;
   let convertedFilePath, finalTranscript;
 
   try {
@@ -24,27 +22,9 @@ async function processJob(job) {
     await File.update({ status: 'processing' }, { where: { id: fileId } });
 
     redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
-    const customTemplate = `
-You are a medical AI assistant. Extract structured clinical notes in **SOAP format**.
+    const template = await Template.findOne({ where: { templateName: template_name } });
 
-### **Input:**
-{transcription}
-
-### **Output Guidelines:**
-- **Strictly** use the exact headings enclosed in **square brackets** (e.g., **[Subjective]**, **[Objective]**).  
-- Do **not** use markdown-style headings like "##".
-- Keep responses **structured and formatted** properly.
-
-### **SOAP Notes Output:**
-[Visit Summary]  
-[Subjective]  
-[Objective]  
-[Assessment]  
-[Plan]  
-[Patient Instructions]  
-[Transcript Summary]  
-`;
-    finalTranscript = await templateTranscript(rawTranscript, customTemplate, process.env.GEMINI_API_KEY);
+    finalTranscript = await templateTranscript(rawTranscript,template, process.env.GEMINI_API_KEY);
 
     redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Compressing Audio' }));
     const compressedFile = await compressAudio(convertedFilePath);
@@ -52,7 +32,7 @@ You are a medical AI assistant. Extract structured clinical notes in **SOAP form
 
     redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Saving Audio' }));
     await File.update({ fileName:fileName, duration: actualDuration, status: 'completed' }, { where: { id: fileId } });
-    await Transcript.create({ fileId:fileId, patientName:patientName, content: finalTranscript, rawContent: rawTranscript, conversationContent: conversationTranscript });
+    await Transcript.create({ fileId:fileId, patientName:patientName, content: finalTranscript, rawContent: rawTranscript, conversationContent: conversationTranscript, templateId: template.id });
 
     redisPub.publish('progress', JSON.stringify({
       fileId:fileId,
@@ -69,7 +49,46 @@ You are a medical AI assistant. Extract structured clinical notes in **SOAP form
   }
 }
 
+async function processTranscriptionJob(job) {
+  const { fileId, template_name } = job.data;
+  try {
+  const existing = await Transcript.findOne({ where: { fileId } });
+  if (!existing) throw new Error(`No transcript found for fileId ${fileId}`);
+
+  const template = await Template.findOne({ where: { templateName: template_name } });
+  if (!template) throw new Error(`Template ${template_name} not found`);
+
+  redisPub.publish('progress_transcript', JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
+
+  const formatted = await templateTranscript(
+    existing.rawContent,
+    template,
+    process.env.GEMINI_API_KEY
+  );
+
+  redisPub.publish('progress_transcript', JSON.stringify({ fileId:fileId, status: 'Updating transcript' }));
+
+  await Transcript.update(
+    { content: formatted, templateId: template.id },
+    { where: { fileId } }
+  );
+
+  redisPub.publish('progress_transcript', JSON.stringify({
+    fileId:fileId,
+    status: 'completed'
+  }));
+}catch (error) {
+  console.error(`Job ${job.id} failed:`, error);
+  throw error;
+}
+}
+
+
 const worker = new Worker('file-processing', processJob, {
+  connection: redisConnection,
+  concurrency: 5
+});
+const transcriptionWorker = new Worker('transcription-processing', processTranscriptionJob, {
   connection: redisConnection,
   concurrency: 5
 });
@@ -80,4 +99,11 @@ worker.on('completed', (job, result) => {
 
 worker.on('failed', (job, err) => {
   console.error(`Job ${job.id} failed:`, err);
+});
+
+transcriptionWorker.on('completed', (job, result) => {
+  console.log(`Transcription job ${job.id} completed.`);
+});
+transcriptionWorker.on('failed', (job, err) => {
+  console.error(`Transcription job ${job.id} failed:`, err);
 });

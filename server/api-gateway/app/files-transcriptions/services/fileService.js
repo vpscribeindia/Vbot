@@ -12,6 +12,7 @@ function getAudioDuration(inputPath){
       }
       const duration = parseFloat(metadata.format.duration);
       resolve(duration);
+      
     });
   });
 };

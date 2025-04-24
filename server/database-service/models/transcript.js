@@ -7,6 +7,10 @@ const Transcript = sequelize.define('Transcript', {
     type: DataTypes.UUID,
     references: { model: 'Files', key: 'id' }
   },
+  templateId: { 
+    type: DataTypes.UUID,
+    references: { model: 'Templates', key: 'id' }
+  },
   patientName: { type: DataTypes.STRING, allowNull: true },
   content: { type: DataTypes.JSON, allowNull: false },
   rawContent: { type: DataTypes.TEXT('long'), allowNull: true },

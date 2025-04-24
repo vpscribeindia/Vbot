@@ -1,4 +1,4 @@
-const { File, Transcript, Billing, Op } = require("../../../config/db");
+const { File, Transcript, Billing, Template, Op } = require("../../../config/db");
 const { addFileJob } = require('../services/queueService');
 const Path = require("path");
 const fs = require('fs');
@@ -23,6 +23,7 @@ async function uploadFile(req, res, next) {
     const fileName = Path.basename(path);
     const userId = req.user.id;
     const patientName = req.body.patientName;
+    const templateName = req.body.templateName;
 
 
     const activeBilling = await Billing.findOne({
@@ -43,7 +44,14 @@ async function uploadFile(req, res, next) {
     }
 
     const maxSeconds = parseUsageLimit(activeBilling.usage_limit);
-    const actualDuration = await getAudioDuration(path);
+    let actualDuration;
+
+    if (!req.body.audioduration) {
+      actualDuration = await getAudioDuration(path);
+    } else {
+      actualDuration = parseUsageLimit(req.body.audioduration);
+    }
+    
 
     if (actualDuration > maxSeconds) {
       const msg = `Audio too long (${actualDuration}s), exceeds billing quota (${maxSeconds}s).`;
@@ -65,6 +73,7 @@ async function uploadFile(req, res, next) {
       filePath: path,
       actualDuration: actualDuration,
       patientName: patientName,
+      template_name: templateName
     };
 
     await addFileJob(jobData);
@@ -87,20 +96,32 @@ async function getFileProgress(req, res) {
     const { fileId } = req.params;
     const file = await File.findOne({
       where: { id: fileId },
-      include: [{ model: Transcript, attributes: ["content","conversationContent"] }],
+      include: [{
+        model: Transcript,
+        attributes: ['content', 'conversationContent'],
+        include: [{
+          model: Template,
+          attributes: ['templateName']
+        }]
+      }],
     });
 
     if (!file) {
-      return res.status(404).json({ message: "File not found" });
+      return res.status(404).json({ message: 'File not found' });
     }
 
+    const transcript = file.Transcript;
+
     res.json({
-      transcript: file.Transcript ? file.Transcript.content : null,
-      conversationTranscript: file.Transcript ? file.Transcript.conversationContent : null,
+      transcript: transcript ? transcript.content : null,
+      conversationTranscript: transcript ? transcript.conversationContent : null,
+      templateName: transcript && transcript.Template
+        ? transcript.Template.templateName
+        : null
     });
   } catch (error) {
-    console.error("Error fetching progress:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching progress:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 }
 

@@ -22,7 +22,7 @@ function parseSOAPNotes(text) {
 
 
 
-async function templateTranscript(transcription, customTemplate, geminiKey) {
+async function templateTranscript(transcription, template, geminiKey) {
     const model = new ChatGoogleGenerativeAI({
         apiKey: geminiKey,
         temperature: 1.0,
@@ -32,14 +32,23 @@ async function templateTranscript(transcription, customTemplate, geminiKey) {
       });
       
   const prompt = new PromptTemplate({
-    template: customTemplate,
-    inputVariables: ["transcription"],
+    template: `You are a medical AI assistant. Extract structured clinical notes in {template_name}.
+    ### **Input:**
+    {transcription}
+    ### **Output Guidelines:**
+    - **Strictly** use the exact headings enclosed in square brackets.  
+    - Do **not** use markdown-style headings like "##".
+    - Keep responses **structured and formatted** properly.
+    ### **SOAP Notes Output:**
+    {headings} 
+    `,
+    inputVariables: ["transcription","headings", "template_name"],
   });
 
 
   const chain = RunnableSequence.from([prompt, model]);
 
-  const response = await chain.invoke({ transcription });
+  const response = await chain.invoke({ transcription, headings: template.headings, template_name: template.templateName });
   const templatedTranscript = response.content.trim();
 
 return parseSOAPNotes(templatedTranscript);

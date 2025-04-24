@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import io from "socket.io-client";
-import { Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Accordion, AccordionSummary, AccordionDetails,Button, Card, CardContent, CardActions,CardActionArea, TextField, Box, IconButton } from "@mui/material";
-import { ContentCopy, Mic, Stop,DeleteForever,Done, AccessTime,VisibilityOff, Visibility,ExpandMore } from "@mui/icons-material";
+import { FormControl, InputLabel, Select, MenuItem,Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Accordion, AccordionSummary, AccordionDetails,Button, Card, CardContent, CardActions,CardActionArea, TextField, Box, IconButton } from "@mui/material";
+import { ContentCopy, Mic, Stop,DeleteForever,Edit,Done, AccessTime,VisibilityOff, Visibility,ExpandMore } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ReactAudioPlayer from 'react-audio-player';
 
@@ -10,7 +10,7 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
 //only for testing purpose
-const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVlZWNkMjUzLTY4MTUtNGZhOS1iZjIzLTRkZDg3MTJiZDgzNyIsImVtYWlsIjoiam9obkBnbWFpbC5jb20iLCJpYXQiOjE3NDUyNTc5ODQsImV4cCI6MTc0NTI2MTU4NH0.rktrlkNKS9wOoyIhLAVnjuow8V1WeuNZg7rGz4KnUw8";
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmNWI2MzI3LTQ1YTEtNDI4MC05MzMwLTdhN2I0NmVhYmI4ZCIsImVtYWlsIjoiaGVsbG93b3JsZEBnbWFpbC5jb20iLCJpYXQiOjE3NDU0MTI3NTMsImV4cCI6MTc0NTQxNjM1M30.IlV7TVf4vGLmaCka6YHMa9lWhbwpB_lOX8PJl4msmsI";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -28,15 +28,65 @@ const Dashboard = () => {
   const [expandAll, setExpandAll] = useState(false);
   const [expandedIndexes, setExpandedIndexes] = useState(new Set());
   const [conversationTranscript, setConversationTranscript] = useState(null);
+  const [templateName, setTemplateName] = useState("");
 
+  const [templates, setTemplates] = useState([]);
+  const [Templatevalue, setTemplatevalue] = useState(null);
 
   const API_URL = `${API_MAIN_URL}/api/transcribe`;
   const PROGRESS_API_URL = `${API_MAIN_URL}/api/progress`;
+  const FORMAT_API_URL = `${API_MAIN_URL}/api/reformatthis`;
+
   const GET_ALL_FILES_URL = `${API_MAIN_URL}/api/fetchall`; 
   const DELETE_FILE = `${API_MAIN_URL}/api/deletefile`; 
   const UPDATE_TRANSCRIPT_URL = `${API_MAIN_URL}/api/updatetranscript`;
+  const GET_ALL_TEMPLATE_URL = `${API_MAIN_URL}/api/fetchalltemplates`;
+  const UPDATE_PATIENT_NAME_URL = `${API_MAIN_URL}/api/updatepatientname`;
+
   const [openConfirmation, setOpenConfirmation] = useState(false);
   const [selectedFileId, setSelectedFileId] = useState(null);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
+
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [editedName, setEditedName] = useState("");
+  
+
+  const handleEditClick = (job) => {
+    setSelectedPatient(job);
+    setEditedName(job.PatientName || "");
+    setEditModalOpen(true);
+  };
+  
+  const handleChange = (event) => {
+    const newValue = event.target.value;
+    setTemplatevalue(newValue);
+    onChange?.(newValue);
+  };
+
+  
+  const handleChangefetched = async (event) => {
+    const newTemplateName = event.target.value;
+
+    try {
+      await axios.post(FORMAT_API_URL, {
+        fileId: selectedJob,
+        templateName: newTemplateName,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      handleJobClick(selectedJob);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+  
+  
+ 
   const handleOpen = (fileId) => {
     setSelectedFileId(fileId);
     setOpenConfirmation(true);
@@ -53,6 +103,26 @@ const Dashboard = () => {
     }
     handleClose();
   };
+  const handleUpdatePatientName = async () => {
+    try {
+      await axios.post(UPDATE_PATIENT_NAME_URL, {
+        fileId: selectedPatient.fileId,
+        patientName: editedName,
+      },{
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setJobStatuses((prev) =>
+        prev.map((j) =>
+          j.fileId === selectedPatient.fileId ? { ...j, PatientName: editedName } : j
+        )
+      );
+      setEditModalOpen(false);
+    } catch (error) {
+      console.error("Error updating name:", error);
+    }
+  }
   const toggleExpandAll = () => {
     setExpandAll(!expandAll);
     setExpandedIndexes(expandAll ? new Set() : new Set(parseJSONTranscript(selectedTranscript).map((s) => s.index)));
@@ -92,8 +162,21 @@ const Dashboard = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        
+        const response = await axios.get(GET_ALL_TEMPLATE_URL,{
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setJobStatuses(data);
+          const list = response.data.templateNames || [];
+          setTemplates(list);
+          // set default to index 2 if available
+          if (list.length > 2) {
+            const defaultValue = list[2];
+            setTemplatevalue(defaultValue);
+          }
+        
+        
       } catch (error) {
         console.error("Error fetching files:", error);
       }
@@ -111,13 +194,25 @@ const Dashboard = () => {
         return [data,...prevJobs];
       });
     };
+
+    const handleProgresstranscript = (data) => {
+      setTranscriptLoading(true); 
+      if (data.status === "completed" || data.status === "failed") {
+        setTranscriptLoading(false);
+        handleJobClick(data.fileId);
+      }
+    };
   
     socket.on("progress", handleProgress);
+    socket.on('progress_transcript', handleProgresstranscript);
   
     return () => {
       socket.off("progress", handleProgress);
+      socket.off('progress_transcript', handleProgresstranscript);
     };
   }, []); 
+
+
 
 
   const handleFileChange = (e) => {
@@ -130,7 +225,7 @@ const Dashboard = () => {
   };
  
   const handleUpload = async () => {
-    if (selectedFiles.length === 0 || PatientName === "") return;
+    if (selectedFiles.length === 0 || PatientName === "" || Templatevalue === "" ) return;
     setUploadStatus("Uploading and processing...");
     if (fileInputRef.current) {
         fileInputRef.current.value = null; 
@@ -139,6 +234,7 @@ const Dashboard = () => {
     const formData = new FormData();
     formData.append("audioFiles", selectedFiles[0]);
     formData.append("patientName", PatientName);
+    formData.append("templateName", Templatevalue);
 
     try {
       const { data } = await axios.post(API_URL, formData, {
@@ -174,6 +270,8 @@ const Dashboard = () => {
       });
       setSelectedTranscript(data.transcript || "No transcript available.");
       setConversationTranscript(data.conversationTranscript || "No conversation transcript available.");
+      setTemplateName(data.templateName || "SOAP General Notes");
+
     } catch (error) {
       console.error("Error fetching transcript:", error);
       setSelectedTranscript("Failed to fetch transcript.");
@@ -198,17 +296,46 @@ const Dashboard = () => {
       console.error("Error accessing microphone:", error);
     }
   };
+
+  const getAccurateDuration = (blob) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = async (event) => {
+        const arrayBuffer = event.target.result;
+        const audioContext = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(1, 2, 44100);
+        
+        try {
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          resolve(audioBuffer.duration);
+        } catch (err) {
+          reject("Error decoding audio data: " + err);
+        }
+      };
+  
+      reader.onerror = () => reject("FileReader error");
+      reader.readAsArrayBuffer(blob);
+    });
+  };
+  
+  
+  
   const handleStopRecording = async () => {
+    if (PatientName === "" || Templatevalue === "" ) return;
     if (!mediaRecorderRef.current) return;
 
     mediaRecorderRef.current.stop();
     mediaRecorderRef.current.onstop = async () => {
       if (audioChunksRef.current.length === 0) return;
 
-      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/ogg; codecs=opus" });
-      const fileName = `recording_${Date.now()}.opus`;
+      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      const duration = await getAccurateDuration(audioBlob);
+      const fileName = `recording_${Date.now()}.webm`;
       const formData = new FormData();
       formData.append("audioFiles", audioBlob, fileName);
+      formData.append("patientName", PatientName);
+      formData.append("templateName", Templatevalue);
+      formData.append("audioduration", duration);
 
       setRecording(false);
       audioChunksRef.current = [];
@@ -238,14 +365,18 @@ const Dashboard = () => {
   
       setJobStatuses((prev) => prev.filter((job) => job.fileId !== fileId));
       setSelectedTranscript(null);
+      setConversationTranscript(null);
+      setTemplateName(null);
+
       
     } catch (error) {
       console.error("Error deleting file:", error);
     }
   };
-
+  
   
   const parseJSONTranscript = (flattenedTranscript) => {
+    if (!flattenedTranscript || typeof flattenedTranscript !== 'object') return [];
     const result = [];
     Object.keys(flattenedTranscript).forEach((key) => {
       const match = key.match(/^(\d+)_heading$/);
@@ -262,7 +393,12 @@ const Dashboard = () => {
   };
   
   
-  
+  const uniqueSections = selectedTranscript
+  ? Array.from(
+      new Map(parseJSONTranscript(selectedTranscript).map(item => [item.index, item])).values()
+    )
+  : [];
+
   
   
   
@@ -348,7 +484,7 @@ const formatTranscript = (data) => {
                     <CardActionArea
                       onClick={() => handleJobClick(job.fileId)}
                       className="p-3 flex flex-col gap-2"
-                    >
+                    ><Box sx={{ typography: "h7",gutterBottom:true }}>Patient Name: </Box>
                         <Box sx={{ typography: "h6",gutterBottom:true }}>{job.PatientName}</Box>
                       <div className="flex items-center gap-3">
                         <ReactAudioPlayer src={`${API_MAIN_URL}/${job.fileName}`} controls />
@@ -371,6 +507,15 @@ const formatTranscript = (data) => {
       >
         <DeleteForever />
       </Button>
+      <Button
+  onClick={() => handleEditClick(job)}
+  color="primary"
+  variant="outlined"
+  className="rounded-lg mr-2"
+>
+  <Edit />
+</Button>
+
                     </CardActions>
                   </>
                 ) : (
@@ -391,6 +536,33 @@ const formatTranscript = (data) => {
         )}
       </div>
     </div>
+    <Dialog open={editModalOpen} onClose={() => setEditModalOpen(false)}>
+  <DialogTitle>Edit Patient Name</DialogTitle>
+  <DialogContent>
+    <TextField
+      autoFocus
+      margin="dense"
+      label="Patient Name"
+      type="text"
+      fullWidth
+      value={editedName}
+      onChange={(e) => setEditedName(e.target.value)}
+    />
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setEditModalOpen(false)} color="secondary">
+      Cancel
+    </Button>
+    <Button
+      onClick={handleUpdatePatientName}
+      color="primary"
+      variant="contained"
+    >
+      Save
+    </Button>
+  </DialogActions>
+</Dialog>
+
     <Dialog
         open={openConfirmation}
         onClose={handleClose}
@@ -416,22 +588,40 @@ const formatTranscript = (data) => {
           <Card className="shadow-md rounded-lg sticky top-0 z-50">
             <CardContent>
               <Box sx={{ typography: "h6",fontWeight: "bold",textTransform: 'uppercase',gutterBottom:true }} >Upload & Transcribe</Box>
-
-              <div className="flex flex-row gap-2 space-y-2 mt-4">
+              <div className="mb-3">
               <TextField
                 autoFocus
                 name="heading"
-                sx={{ "& .MuiInputBase-input": { fontWeight: "bold", fontSize: "18px" } }}
+                sx={{ "& .MuiInputBase-input": { fontWeight: "bold", fontSize: "18px"} }}
                 fullWidth
                 value={PatientName}
                 onChange={(e) => setPatientName(e.target.value)}
                 variant="filled"
                 id="filled-basic"
                 label="Patient Name"
-                className="mt-2 bg-gray-100 rounded-lg"
+                className="bg-gray-100 rounded-lg"
               />
+             </div>
+       
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="template-select-label">Template</InputLabel>
+          <Select
+            labelId="template-select-label"
+            label="Template"
+            value={Templatevalue}
+            onChange={handleChange}
+          >
+            {templates.map((name, index) => (
+              <MenuItem key={index} value={name}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+      
+      </FormControl>
+
+              <div className="flex flex-row gap-2 space-y-2 mt-4">
               <input className="block w-full border border-gray-300 rounded-lg p-2" ref={fileInputRef} type="file" onChange={handleFileChange} />
-              
                 <Button variant="contained" color="primary" onClick={handleUpload} className="w-full mx-2">Upload</Button>
                 <Button
                   variant="contained"
@@ -447,7 +637,13 @@ const formatTranscript = (data) => {
           </Card>
 
           {/* Transcript Display Section */}
-          {selectedTranscript && (
+          {transcriptLoading ? (
+  <div className="flex justify-center items-center py-8">
+    <div className="animate-spin border-4 border-gray-300 border-t-blue-500 rounded-full w-10 h-10"></div>
+  </div>
+) : (
+  
+          selectedTranscript && (
   <Card className="p-4 shadow-md rounded-lg">
     <CardContent>
       <Box
@@ -456,14 +652,36 @@ const formatTranscript = (data) => {
           fontWeight: "bold",
           textTransform: "uppercase",
           gutterBottom: true,
+          display: "flex",
+          marginBottom: "16px",
         }}
       >
         Transcript
+
         <IconButton onClick={toggleExpandAll} className="text-gray-600 hover:text-gray-800">
           {expandAll ? <Visibility />:<VisibilityOff />}
         </IconButton>
+     
+      <FormControl fullWidth variant="outlined">
+        <InputLabel id="template-fetch-label">Template</InputLabel>
+ 
+          <Select
+            labelId="template-fetch-label"
+            label="Template"
+            value={templateName}
+            onChange={handleChangefetched}
+          >
+            {templates.map((name,index) => (
+              <MenuItem key={index} value={name}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+      </FormControl>
+   
       </Box>
-      {parseJSONTranscript(selectedTranscript).map((section) => (
+      
+      {uniqueSections.map((section) => (
         <Accordion
           key={section.index}
           expanded={expandedIndexes.has(section.index)}
@@ -522,6 +740,7 @@ const formatTranscript = (data) => {
       ))}
     </CardContent>
   </Card>
+  )
 )}
      
  {conversationTranscript && (

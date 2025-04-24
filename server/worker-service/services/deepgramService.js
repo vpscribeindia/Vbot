@@ -6,7 +6,7 @@ async function transcribeAudio(filePath, deepgramApiKey) {
         const fileBuffer = fs.readFileSync(filePath);
         const { result, error } =
           await deepgram.listen.prerecorded.transcribeFile(fileBuffer, {
-            model: "nova-2",
+            model: "nova-3-medical",
             detect_language: true,
             smart_format: true,
             punctuate: true,
