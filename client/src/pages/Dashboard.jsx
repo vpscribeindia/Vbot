@@ -10,7 +10,7 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
 //only for testing purpose
-const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmNWI2MzI3LTQ1YTEtNDI4MC05MzMwLTdhN2I0NmVhYmI4ZCIsImVtYWlsIjoiaGVsbG93b3JsZEBnbWFpbC5jb20iLCJpYXQiOjE3NDU0MTI3NTMsImV4cCI6MTc0NTQxNjM1M30.IlV7TVf4vGLmaCka6YHMa9lWhbwpB_lOX8PJl4msmsI";
+const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmNWI2MzI3LTQ1YTEtNDI4MC05MzMwLTdhN2I0NmVhYmI4ZCIsImVtYWlsIjoiaGVsbG93b3JsZEBnbWFpbC5jb20iLCJpYXQiOjE3NDU1MTg2MzQsImV4cCI6MTc0NTUyMjIzNH0.i9XzjaFGo8eWsJdcsfm1ClVrmR7heklMGmj12Om6Eww";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -31,7 +31,7 @@ const Dashboard = () => {
   const [templateName, setTemplateName] = useState("");
 
   const [templates, setTemplates] = useState([]);
-  const [Templatevalue, setTemplatevalue] = useState(null);
+  const [Templatevalue, setTemplatevalue] = useState("");
 
   const API_URL = `${API_MAIN_URL}/api/transcribe`;
   const PROGRESS_API_URL = `${API_MAIN_URL}/api/progress`;
@@ -439,22 +439,26 @@ const handleTranscriptChange = (e, sectionIndex) => {
 };
 
 const formatTranscript = (data) => {
-  // Create an array to hold the formatted strings
+  if (!Array.isArray(data)) {
+    console.warn("Expected an array but got:", data);
+    return [];
+  }
+
   const formattedStrings = [];
 
-  // Iterate over each speaker object
   data.forEach((speakerObj) => {
     Object.entries(speakerObj).forEach(([speaker, sentences]) => {
-      sentences.forEach(({ text, startTime, endTime }) => {
-        // Capture each formatted string and push it to the array
-        formattedStrings.push(`${speaker} (${startTime}-${endTime})=> ${text}`);
-      });
+      if (Array.isArray(sentences)) {
+        sentences.forEach(({ text, startTime, endTime }) => {
+          formattedStrings.push(`${speaker} (${startTime}-${endTime}) => ${text}`);
+        });
+      }
     });
   });
 
-  // Return the array of formatted strings
   return formattedStrings;
 };
+
   
   
   return (
