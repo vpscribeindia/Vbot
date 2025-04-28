@@ -3,10 +3,11 @@ import { HashRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./components/Login";
 // import Register from "./components/Register";
 import Dashboard from "./pages/Dashboard";
-// import ProtectedRoute from "./components/ProtectedRoute";
 import DefaultRoute from "./pages/DefaultRoute";
 import {  ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import ProtectedRoute from "./pages/ProtectedRoute";
+import './App.css'
 function App() {
   return (
     <Router>
@@ -35,7 +36,10 @@ function App() {
         <Route
           path="/dashboard"
           element={
+            <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+
           }
         />
 

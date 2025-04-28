@@ -87,11 +87,13 @@ const profile = (req, res) => {
 
 // Logout
 const logout = (req, res) => {
-    req.logout(() => {
-        req.session.destroy(() => {
-            res.redirect("/");
-        });
+    res.clearCookie('accessToken', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', 
+      sameSite: 'lax', 
     });
-};
+  
+    return res.status(200).json({ message: 'Logged out successfully' });
+  };
 
 module.exports = { googleAuth, googleCallback, profile, logout };

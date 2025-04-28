@@ -80,7 +80,10 @@ app.use('/api', transcriptRoutes);
 app.use('/api', authRoutes);
 app.use('/api', questionRoutes);
 app.use('/auth', userRoutes);
+app.use('/auth', authRoutes);
+
 app.use('/api', billingRoutes);
+
 
 
 // Global error handler

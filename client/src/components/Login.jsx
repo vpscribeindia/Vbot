@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import Google from "../assets/google.png";
-import Microsoft from "../assets/microsoft.png";
 import Logo from "../assets/Logo.png";
 import leftimg from "../assets/leftimg.jpg";
 import WholeBG from "../assets/bg.png";
@@ -25,11 +24,6 @@ const [email,setEmail] = useState("");
 const [password,setPassword]  =useState("");
 const navigate = useNavigate();
 const API_MAIN_URL=import.meta.env.VITE_API_URL;
-// const handleInput= (e)=>{
-//   const inputs = {[e.target.name]:e.target.value}
-//   setUserData({...userData,...inputs})
-  
-// }
 
 
 const handleSubmit= async (e)=>{
@@ -226,7 +220,7 @@ const handleSubmit= async (e)=>{
           </Box>
 
           {/* Forget Password */}
-          <Box
+          {/* <Box
             sx={{
               textAlign: "right",
               width: { xs: 250, sm: 400, md: 350 },
@@ -239,7 +233,7 @@ const handleSubmit= async (e)=>{
             >
               Forgot Password?
             </Link>
-          </Box>
+          </Box> */}
 
           {/* Sign In Button */}
           <Box sx={{ py: 1, textAlign: "center" }}>
@@ -264,7 +258,7 @@ const handleSubmit= async (e)=>{
             }}
           >
             <Button><img src={Google} alt="Google" width={40} /></Button>
-            <Button><img src={Microsoft} alt="Microsoft" width={40} /></Button>
+
           </Box>
 
           {/* Sign Up Prompt */}

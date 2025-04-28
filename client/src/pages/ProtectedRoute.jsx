@@ -7,31 +7,14 @@ const ProtectedRoute = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    const Apiurl = process.env.REACT_APP_API_URL.slice(0, -15);
-    const isTokenValid = (token) => {
-      try {
-        const { exp } = JSON.parse(atob(token.split(".")[1]));
-        return Date.now() < exp * 1000;
-      } catch {
-        return false;
-      }
-    };
-    if (!token || !isTokenValid(token)) {
-      setIsAuthenticated(false);
-      setLoading(false);
-      return;
-    }
+    const API_MAIN_URL=import.meta.env.VITE_API_URL;
 
     axios
-      .get(`${Apiurl}/auth/protected`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(`${API_MAIN_URL}/auth/protected`, { withCredentials: true }) 
       .then(() => {
         setIsAuthenticated(true);
       })
       .catch(() => {
-        localStorage.removeItem("authToken");
         setIsAuthenticated(false);
       })
       .finally(() => {

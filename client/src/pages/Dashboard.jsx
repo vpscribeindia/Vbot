@@ -6,7 +6,7 @@ import { FormControl, InputLabel, Select, MenuItem,Dialog, DialogTitle, DialogCo
 import { ContentCopy, Mic, Stop,DeleteForever,Edit,Done, AccessTime,VisibilityOff, Visibility,ExpandMore } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import ReactAudioPlayer from 'react-audio-player';
-
+import { toast } from "react-toastify";
 const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
@@ -52,14 +52,13 @@ const Dashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [editedName, setEditedName] = useState("");
   const navigate = useNavigate();
+  
+  const handleLogout = async () => {
+    await axios.get(`${API_MAIN_URL}/auth/logout`);
+    toast.success('Logged out!');
+    navigate('/login');
+  };
 
-  useEffect(() => {
-    axios.get(`${API_MAIN_URL}/auth/protected`, { withCredentials: true })
-      .catch(() => {
-        toast.error('Unauthorized. Please login.');
-        navigate('/');
-      });
-  }, [navigate]);
 
   const handleEditClick = (job) => {
     setSelectedPatient(job);
@@ -82,9 +81,7 @@ const Dashboard = () => {
         fileId: selectedJob,
         templateName: newTemplateName,
       }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
   
       handleJobClick(selectedJob);
@@ -776,8 +773,12 @@ const uniqueSections = parsedTranscript
   </CardContent>
 </Card>
 
+
 )}
 
+<button onClick={handleLogout} className="mt-4 bg-red-500 text-white p-2 rounded">
+        Logout
+      </button>
         </div>
       </div>
     
