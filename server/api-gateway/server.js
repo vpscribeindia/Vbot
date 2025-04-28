@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const cookieParser = require('cookie-parser');
+
 const passport = require("passport");
 const bodyParser = require("body-parser");
 const compression = require("compression");
@@ -29,8 +31,11 @@ const corsOptions = {
       callback(new Error("CORS not allowed from this origin"));
     }
   },
+
   methods: ["GET", "POST", "DELETE", "PUT"],
   allowedHeaders: ["Content-Type", "Authorization"],
+credentials:true,
+
 };
 
 app.use(cors(corsOptions));
@@ -43,6 +48,8 @@ const io = socketIo(server, {
 // Middleware for JSON body parsing
 app.use(express.static("./app/files-transcriptions/uploads"));
 app.use(bodyParser.json());
+app.use(cookieParser());
+
 app.use(compression());
 app.use(cacheController({ maxAge: 0 }));
 // Mount API routes
@@ -72,7 +79,7 @@ app.use('/api', transcriptRoutes);
 //authRoutes
 app.use('/api', authRoutes);
 app.use('/api', questionRoutes);
-app.use('/api', userRoutes);
+app.use('/auth', userRoutes);
 app.use('/api', billingRoutes);
 
 

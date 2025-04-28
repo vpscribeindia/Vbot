@@ -59,10 +59,15 @@ const login = async (req, res) => {
         const token = jwt.sign(
             { id: user.id, email: user.email },
             process.env.JWT_SECRET,
-            { expiresIn: "1h" }
+            { expiresIn: "24h" }
         );
-
-        res.status(200).json({ message: "Login successful", token });
+        res.cookie('accessToken', token, {
+            httpOnly: true,
+            secure: false, // set true if https
+            sameSite: 'Strict',
+            maxAge: 3600000, // 1 hour
+          }).json({ message: 'Login successful' });
+        // res.status(200).json({ message: "Login successful", token });
     } catch (error) {
         console.error("Login Error:", error);
         res.status(500).json({ message: "Server error" });
@@ -118,4 +123,11 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { signup, login, getUsers, updateUser, deleteUser };
+const protectedUser = async (req, res) => {
+    res.json({
+      message: 'This is protected data!',
+      user: req.user,
+    });
+};
+
+module.exports = { signup, login, getUsers, updateUser, deleteUser,protectedUser };

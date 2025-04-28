@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 import io from "socket.io-client";
 import { FormControl, InputLabel, Select, MenuItem,Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Accordion, AccordionSummary, AccordionDetails,Button, Card, CardContent, CardActions,CardActionArea, TextField, Box, IconButton } from "@mui/material";
 import { ContentCopy, Mic, Stop,DeleteForever,Edit,Done, AccessTime,VisibilityOff, Visibility,ExpandMore } from "@mui/icons-material";
@@ -10,7 +11,7 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
 
 //only for testing purpose
-const token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmNWI2MzI3LTQ1YTEtNDI4MC05MzMwLTdhN2I0NmVhYmI4ZCIsImVtYWlsIjoiaGVsbG93b3JsZEBnbWFpbC5jb20iLCJpYXQiOjE3NDU1MjI4OTEsImV4cCI6MTc0NTUyNjQ5MX0.gLbVaTfg6_7qKEaGsBzheGiRk2Y8ZYLuzm8NQ-echV8";
+// const token="";
 const Dashboard = () => {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
@@ -50,7 +51,15 @@ const Dashboard = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [editedName, setEditedName] = useState("");
-  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get(`${API_MAIN_URL}/auth/protected`, { withCredentials: true })
+      .catch(() => {
+        toast.error('Unauthorized. Please login.');
+        navigate('/');
+      });
+  }, [navigate]);
 
   const handleEditClick = (job) => {
     setSelectedPatient(job);
@@ -109,9 +118,7 @@ const Dashboard = () => {
         fileId: selectedPatient.fileId,
         patientName: editedName,
       },{
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
       setJobStatuses((prev) =>
         prev.map((j) =>
@@ -143,9 +150,8 @@ const Dashboard = () => {
         fileId: selectedJob,
         transcript: changedFields, 
       },{
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
+        
       });
       setChangedFields({});
     } catch (error) {
@@ -158,14 +164,10 @@ const Dashboard = () => {
     const fetchFiles = async () => {
       try {
         const { data } = await axios.get(GET_ALL_FILES_URL, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         });
         const response = await axios.get(GET_ALL_TEMPLATE_URL,{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true
         });
         setJobStatuses(data);
           const list = response.data.templateNames || [];
@@ -239,9 +241,9 @@ const Dashboard = () => {
     try {
       const { data } = await axios.post(API_URL, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",  
-          Authorization: `Bearer ${token}`, 
+          "Content-Type": "multipart/form-data",            
         },
+        withCredentials: true,
       });
       
 
@@ -264,9 +266,7 @@ const Dashboard = () => {
 
     try {
       const { data } = await axios.get(`${PROGRESS_API_URL}/${fileId}`,{
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
       setSelectedTranscript(data.transcript || "No transcript available.");
       setConversationTranscript(data.conversationTranscript || "No conversation transcript available.");
@@ -342,9 +342,7 @@ const Dashboard = () => {
 
       try {
         const { data } = await axios.post(API_URL, formData,{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
+          withCredentials: true,
         });
         setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
 
@@ -358,9 +356,7 @@ const Dashboard = () => {
   const handleDelete = async (fileId) => {
     try {
       await axios.delete(`${DELETE_FILE}/${fileId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        withCredentials: true,
       });
   
       setJobStatuses((prev) => prev.filter((job) => job.fileId !== fileId));

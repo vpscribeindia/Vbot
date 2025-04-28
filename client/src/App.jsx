@@ -1,12 +1,46 @@
+import React from "react";
+import { HashRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./components/Login";
+// import Register from "./components/Register";
 import Dashboard from "./pages/Dashboard";
-import { motion } from "framer-motion";
-import './App.css'
- 
+// import ProtectedRoute from "./components/ProtectedRoute";
+import DefaultRoute from "./pages/DefaultRoute";
+import {  ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 function App() {
   return (
-    <motion.div className="container mx-auto px-6 py-8 h-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
-      <Dashboard />
-      </motion.div>
+    <Router>
+               <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              hideProgressBar={false}
+              newestOnTop
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+            />
+      <Routes>
+  
+        {/* Default Route */}
+        <Route path="/" element={<DefaultRoute />} />
+
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        {/* <Route path="/register" element={<Register />} /> */}
+
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+              <Dashboard />
+          }
+        />
+
+      </Routes>
+    </Router>
   );
 }
 
