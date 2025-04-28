@@ -1,11 +1,8 @@
 require('dotenv').config();
 const express = require('express');
 const cookieParser = require('cookie-parser');
-
-const passport = require("passport");
 const bodyParser = require("body-parser");
 const compression = require("compression");
-const session = require("express-session");
 const cacheController = require("express-cache-controller");
 const cors = require("cors");
 const http = require('http');
@@ -54,22 +51,6 @@ app.use(compression());
 app.use(cacheController({ maxAge: 0 }));
 // Mount API routes
 
-// Express session configuration
-app.use(
-  session({
-    secret: "secret",
-    resave: false,
-    saveUninitialized: true,
-  })
-);
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Home Page
-app.get("/googlelogin", (req, res) => {
-  res.send("<a href='/auth/google'>Sign Up with Google</a><br><a href='/auth/google'>Sign In with Google</a>");
-});
 
 //file routes
 app.use('/api', fileRoutes);

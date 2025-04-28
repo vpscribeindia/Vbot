@@ -31,7 +31,10 @@ const Signup = () => {
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
       return regex.test(password);
     };
-  
+    const handleGoogleLogin = () => {
+      window.location.href = `${API_MAIN_URL}/auth/google`;
+    
+    };
     const handleSubmit = async (e) => {
       e.preventDefault();
   
@@ -265,7 +268,7 @@ const Signup = () => {
               gap: 10,
             }}
           >
-            <Button><img src={GoogleLogo} alt="Google" width={40} /></Button>
+            <Button onClick={handleGoogleLogin}><img src={GoogleLogo} alt="Google" width={40} /></Button>
           </Box>
 
           <Box

@@ -4,10 +4,10 @@ const { googleAuth, googleCallback, profile, logout } = require("../controllers/
 const router = express.Router();
 
 // Google Authentication
-router.get("/auth/google", googleAuth);
+router.get("/google", googleAuth);
 
 // Google OAuth Callback
-router.get("/auth/google/callback", googleCallback, (req, res) => {
+router.get("/google/callback", googleCallback, (req, res) => {
     res.redirect("/profile");
 });
 

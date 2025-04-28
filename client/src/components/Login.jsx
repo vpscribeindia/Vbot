@@ -25,6 +25,10 @@ const [password,setPassword]  =useState("");
 const navigate = useNavigate();
 const API_MAIN_URL=import.meta.env.VITE_API_URL;
 
+const handleGoogleLogin = () => {
+  window.location.href = `${API_MAIN_URL}/auth/google`;
+
+};
 
 const handleSubmit= async (e)=>{
   e.preventDefault();
@@ -257,7 +261,9 @@ const handleSubmit= async (e)=>{
               gap: 10,
             }}
           >
-            <Button><img src={Google} alt="Google" width={40} /></Button>
+            <Button
+            onClick={handleGoogleLogin}
+            ><img src={Google} alt="Google" width={40} /></Button>
 
           </Box>
 
