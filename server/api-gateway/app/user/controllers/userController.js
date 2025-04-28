@@ -5,12 +5,21 @@ const { User } = require("../../../config/db");
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
-    console.log(req.body)
+
+
     if (!email || !password) {
         return res.status(400).json({ message: "All fields are required" });
     }
 
     try {
+        // 🔥 First check if user already exists
+        const existingUser = await User.findOne({ where: { email } });
+
+        if (existingUser) {
+            return res.status(409).json({ message: "User already exists" }); // 409 Conflict
+        }
+
+        // 🛡️ If not, create new user
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const newUser = await User.create({
@@ -24,6 +33,7 @@ const signup = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -62,7 +72,7 @@ const login = async (req, res) => {
             secure: false, // set true if https
             sameSite: 'Strict',
             maxAge: 3600000, // 1 hour
-          }).json({ message: 'Login successful' });
+        }).json({ message: 'Login successful' });
         // res.status(200).json({ message: "Login successful", token });
     } catch (error) {
         console.error("Login Error:", error);
@@ -121,9 +131,9 @@ const deleteUser = async (req, res) => {
 
 const protectedUser = async (req, res) => {
     res.json({
-      message: 'This is protected data!',
-      user: req.user,
+        message: 'This is protected data!',
+        user: req.user,
     });
 };
 
-module.exports = { signup, login, getUsers, updateUser, deleteUser,protectedUser };
+module.exports = { signup, login, getUsers, updateUser, deleteUser, protectedUser };
