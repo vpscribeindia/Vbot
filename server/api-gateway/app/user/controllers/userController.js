@@ -4,14 +4,10 @@ const jwt = require("jsonwebtoken");
 const { User } = require("../../../config/db");
 
 const signup = async (req, res) => {
-    const { email, password, confirmPassword } = req.body;
+    const { email, password } = req.body;
     console.log(req.body)
-    if (!email || !password || !confirmPassword) {
+    if (!email || !password) {
         return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (password !== confirmPassword) {
-        return res.status(400).json({ message: "Passwords do not match" });
     }
 
     try {

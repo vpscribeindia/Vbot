@@ -16,7 +16,7 @@ import {
 import Grid from "@mui/material/Grid";
 import Google from "../assets/google.png";
 import Logo from "../assets/Logo.png";
-import leftimg from "../assets/leftimg.jpg";
+import leftimg from "../assets/leftimg.png";
 import WholeBG from "../assets/bg.png";
 axios.defaults.withCredentials = true;
 const Login = () => {
@@ -268,6 +268,7 @@ const handleSubmit= async (e)=>{
               size="small"
               variant="contained"
               sx={{ backgroundColor: "grey", ml: 2, py: 0, fontFamily: "Montserrat, sans-serif" }}
+              onClick={() => navigate('/signup')}
             >
               Sign up
             </Button>
