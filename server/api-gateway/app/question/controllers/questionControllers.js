@@ -1,38 +1,53 @@
-const { Userinfo, Billing } = require("../../../config/db");
+const { User,Userinfo, Billing } = require("../../../config/db");
 const moment = require("moment");
 
 const createUserInfo = async (req, res) => {
-    if (!req.user || !req.user.id) {
-        return res.status(401).json({ error: "Unauthorized: Missing user ID" });
-      }
-
     try {
-        const userId = req.user.id;
-        const {display_name, specialty, role, praction } = req.body;
+        const { user_id, display_name, specialty, role, praction } = req.body;
 
-        // ✅ First define dates
+        // ✅ Validate required fields
+        if (!user_id || !display_name || !specialty || !role || !praction) {
+            return res.status(400).json({
+                message: "All fields (user_id, display_name, specialty, role, praction) are required"
+            });
+        }
+
+        // ✅ Check if user exists
+        const user = await User.findByPk(user_id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // ✅ Create user info
+        const userInfo = await Userinfo.create({ user_id, display_name, specialty, role, praction });
+
+        // ✅ Define trial dates
         const package_start_date = moment();
         const package_end_date = moment(package_start_date).add(7, "days");
 
-        const userInfo = await Userinfo.create({user_id:userId, display_name, specialty, role, praction });
-
+        // ✅ Create billing
         const billing = await Billing.create({
-            user_id:userId,
+            user_id,
             amount: "0",
-            // status: "active",
-            status: "paid", // Set it as paid since PayPal confirms
-            pakage_type: "basic",
+            status: "active",
+            payment_status: "paid",
+            pakage_type: "trial",
             usage_limit: "3600",
             pakage_discription: "free trial",
-            package_start_date: package_start_date.toDate(), // save as Date format
-            package_end_date: package_end_date.toDate(),     // save as Date format
+            package_start_date: package_start_date.toDate(),
+            package_end_date: package_end_date.toDate(),
         });
 
+        // ✅ Activate user
+        user.status = "active";
+        await user.save();
+
+        // ✅ Respond with both userInfo and billing
         res.status(201).json({
-            message: "Free trial added successfully",
-            data: {
+            message: "User profile and trial billing created successfully",
+            userInfo: userInfo,
+            billing: {
                 ...billing.toJSON(),
-                usage_limit: String(parseInt(billing.usage_limit) / 60), // 🔥 Convert seconds to minutes
                 package_start_date: package_start_date.format("DD-MM-YYYY"),
                 package_end_date: package_end_date.format("DD-MM-YYYY"),
             },

@@ -33,7 +33,18 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         defaultValue: "local", // or "google"
     },
-
+    // role: {
+    //     type: DataTypes.STRING,
+    //     allowNull: false,
+    //     defaultValue: 'user', // default role is 'user'
+    //     validate: {
+    //         isIn: [['admin', 'user']] // Only allow 'admin' or 'user'
+    //     }
+    // },
+    status: {
+        type: DataTypes.ENUM("active", "inactive"),
+        defaultValue: "inactive",
+    },
 });
 
 module.exports = User;

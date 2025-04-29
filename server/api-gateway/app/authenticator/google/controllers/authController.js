@@ -62,6 +62,7 @@ const googleCallback = async (req, res) => {
         email: email,
         password: null, // No password for OAuth users
         auth_provider: 'google',
+        status : "inactive",
       });
       isNewUser = true;
     }

@@ -26,6 +26,8 @@ const signup = async (req, res) => {
         const newUser = await User.create({
             email,
             password: hashedPassword,
+            status : "inactive",
+
         });
 
         res.status(201).json({ message: "User created successfully", user: newUser });
@@ -64,7 +66,7 @@ const login = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { id: user.id, email: user.email },
+            { id: user.id, email: user.email, },
             process.env.JWT_SECRET,
             { expiresIn: "24h" }
         );
