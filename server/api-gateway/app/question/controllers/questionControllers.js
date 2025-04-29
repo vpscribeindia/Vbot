@@ -1,11 +1,38 @@
-const { Userinfo } = require("../../../config/db");
+const { Userinfo, Billing } = require("../../../config/db");
+const moment = require("moment");
 
 const createUserInfo = async (req, res) => {
     try {
         const { user_id, display_name, specialty, role, praction } = req.body;
+
+        // ✅ First define dates
+        const package_start_date = moment();
+        const package_end_date = moment(package_start_date).add(7, "days");
+
         const userInfo = await Userinfo.create({ user_id, display_name, specialty, role, praction });
 
-        res.status(201).json({ message: "User info created successfully", data: userInfo });
+        const billing = await Billing.create({
+            user_id,
+            amount: "0",
+            status: "active",
+            payment_status: "paid", // Set it as paid since PayPal confirms
+            pakage_type: "trial",
+            usage_limit: "3600",
+            pakage_discription: "free trial",
+            package_start_date: package_start_date.toDate(), // save as Date format
+            package_end_date: package_end_date.toDate(),     // save as Date format
+        });
+
+        res.status(201).json({
+            message: "Free trial added successfully",
+            data: {
+                ...billing.toJSON(),
+                usage_limit: String(parseInt(billing.usage_limit) / 60), // 🔥 Convert seconds to minutes
+                package_start_date: package_start_date.format("DD-MM-YYYY"),
+                package_end_date: package_end_date.format("DD-MM-YYYY"),
+            },
+        });
+
     } catch (error) {
         console.error("❌ Error in createUserInfo:", error);
         res.status(500).json({ error: "Something went wrong", details: error.message });
