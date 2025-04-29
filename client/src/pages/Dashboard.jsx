@@ -174,23 +174,23 @@ const Dashboard = () => {
           withCredentials: true
         }
       );
-      const minutes = Math.floor(response1.data.usage_limit / 60);
+      const minutes = convertTime(response1.data.usage_limit);
       setremainingMinutes(minutes);
 
       // ✅ Send mail only ONCE when minutes ≤ 10
-      if (minutes <= 10) {
-        try {
-          await axios.post(`${API_MAIN_URL}/auth/sendemail`, {
-            to: 'gokuldev@vpscribes.com',
-            subject: 'Plan Upgrade',
-            text: `Your plan will expire soon. Only ${minutes} minutes remaining. Please upgrade.`,
-          });
-          toast.success('Email sent');
-        } catch (err) {
-          console.error(err);
-          toast.error('Failed to send email');
-        }
-      }
+      // if (minutes <= 10) {
+      //   try {
+      //     await axios.post(`${API_MAIN_URL}/auth/sendemail`, {
+      //       to: 'gokuldev@vpscribes.com',
+      //       subject: 'Plan Upgrade',
+      //       text: `Your plan will expire soon. Only ${minutes} minutes remaining. Please upgrade.`,
+      //     });
+      //     toast.success('Email sent');
+      //   } catch (err) {
+      //     console.error(err);
+      //     toast.error('Failed to send email');
+      //   }
+      // }
         setJobStatuses(data);
           const list = response.data.templateNames || [];
           setTemplates(list);
@@ -270,7 +270,7 @@ const Dashboard = () => {
       
 
       setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
-      const minutes = Math.floor(data.usage_limit / 60);
+      const minutes = convertTime(data.usage_limit);
       setremainingMinutes(minutes);
       setUploadStatus("Upload successful!");
       setSelectedFiles([]);
@@ -368,7 +368,7 @@ const Dashboard = () => {
         const { data } = await axios.post(API_URL, formData,{
           withCredentials: true,
         });
-        const minutes = Math.floor(data.usage_limit / 60);
+        const minutes = convertTime(data.usage_limit);
         setremainingMinutes(minutes);
         setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
 
