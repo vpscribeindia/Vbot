@@ -1,7 +1,6 @@
 // src/components/UserManagement.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import UserCard from "./UserCard";
 import UserTable from "./UserTable";
 import UserFormModal from "./UserFormModal";
 import { FaPlus } from "react-icons/fa";
@@ -9,7 +8,6 @@ import { toast } from "react-toastify";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [viewMode, setViewMode] = useState("table");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -75,7 +73,6 @@ const UserManagement = () => {
         <h2 className="text-3xl font-bold text-gray-800">User Management</h2>
 
         <div className="flex items-center gap-4">
-          {/* Toggle Switch */}
 
           {/* Add User Button */}
           <button
@@ -98,18 +95,6 @@ const UserManagement = () => {
         <p className="text-red-500 italic">{error}</p>
       ) : users.length === 0 ? (
         <p className="text-gray-500 italic">No users found.</p>
-      ) : viewMode === "card" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
-          {users.map((user) => (
-            <UserCard
-              key={user.id}
-              user={user}
-              onEdit={handleEdit}
-              onDelete={() => setDeleteUserId(user.id)}
-              onPassword={handlePassword}
-            />
-          ))}
-        </div>
       ) : (
         <div className="bg-white rounded-xl shadow-md p-4">
           <UserTable

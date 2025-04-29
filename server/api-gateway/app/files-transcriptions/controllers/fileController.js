@@ -77,12 +77,14 @@ async function uploadFile(req, res, next) {
     };
 
     await addFileJob(jobData);
+    const updatedLimit = subtractUsageLimit(activeBilling.usage_limit, actualDuration);
     res.status(202).json({
       status: 'File queued for processing',
-      fileId: file.id
+      fileId: file.id,
+      usage_limit: updatedLimit
     });
 
-    const updatedLimit = subtractUsageLimit(activeBilling.usage_limit, actualDuration);
+    
     await Billing.update({ usage_limit: updatedLimit }, { where: { id: activeBilling.id } });
 
   } catch (error) {

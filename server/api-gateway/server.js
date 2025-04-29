@@ -47,6 +47,8 @@ app.use(express.static("./app/files-transcriptions/uploads"));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
+
+
 app.use(compression());
 app.use(cacheController({ maxAge: 0 }));
 // Mount API routes
@@ -62,6 +64,8 @@ app.use('/api', authRoutes);
 app.use('/api', questionRoutes);
 app.use('/auth', userRoutes);
 app.use('/auth', authRoutes);
+
+
 
 app.use('/api', billingRoutes);
 

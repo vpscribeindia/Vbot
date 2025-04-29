@@ -3,21 +3,14 @@ import {
   FaEdit,
   FaKey,
   FaTrash,
-  FaArrowUp,
-  FaArrowDown,
 } from "react-icons/fa";
 import AvatarCircle from "./AvatarCircle";
 
 const UserTableRow = ({
   user,
-  index,
-  moveUp,
-  moveDown,
   handleEdit,
   handlePassword,
   handleDelete,
-  isFirst,
-  isLast,
 }) => {
   return (
     <tr className="border-t">
@@ -28,12 +21,6 @@ const UserTableRow = ({
       <td className="px-4 py-2">{user.email}</td>
       <td className="px-4 py-2">{user.role}</td>
       <td className="px-4 py-2 space-x-2 text-center">
-        {/* <button onClick={() => moveUp(index)} disabled={isFirst}>
-          <FaArrowUp className="inline text-blue-500" />
-        </button>
-        <button onClick={() => moveDown(index)} disabled={isLast}>
-          <FaArrowDown className="inline text-blue-500" />
-        </button> */}
         <button onClick={() => handleEdit(user.id)}>
           <FaEdit className="inline text-yellow-500" />
         </button>
