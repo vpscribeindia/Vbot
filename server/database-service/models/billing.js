@@ -17,9 +17,9 @@ const Billing = sequelize.define("Billing", {
         defaultValue: "pending",
     },
     pakage_type: {
-        type: DataTypes.ENUM("basic", "standard", "premium"),
+        type: DataTypes.ENUM("trial","basic", "standard", "premium"),
         allowNull: false,
-        defaultValue: "basic",
+        defaultValue: "trial",
     },
     package_end_date: {
         type: DataTypes.DATE,

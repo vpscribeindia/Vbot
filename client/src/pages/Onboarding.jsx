@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Stepper,
@@ -10,7 +10,6 @@ import {
   Link,
   IconButton,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
 } from "@mui/material";
@@ -19,6 +18,8 @@ import Logo from "../assets/logo.png";
 import OnBoard from "../assets/onboard.png";
 import OnBoardGalaxy from "../assets/onboardgalaxy.png";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import axios from "axios";
 import {
   Email,
   Phone,
@@ -26,7 +27,6 @@ import {
   Instagram,
   LinkedIn,
   YouTube,
-  Twitter,
 } from "@mui/icons-material";
 import WholeBG from "../assets/bg.png";
 
@@ -40,32 +40,75 @@ const steps = [
 ];
 
 const OnboardingUI = () => {
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [skipped, setSkipped] = React.useState(new Set());
-  const [specialty, setSpecialty] = React.useState("");
+  const [activeStep, setActiveStep] = useState(0);
+  const [skipped, setSkipped] = useState(new Set());
+  const [name, setName] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [role, setRole] = useState("");
+  const [clinicianCount, setClinicianCount] = useState("");
+  const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
+  const API_MAIN_URL = import.meta.env.VITE_API_URL;
 
   const isStepSkipped = (step) => skipped.has(step);
 
-  const handleSpecialtyChange = (event) => {
-    setSpecialty(event.target.value);
-  };
-
   const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
+    if (validateStep()) {
+      let newSkipped = skipped;
+      if (isStepSkipped(activeStep)) {
+        newSkipped = new Set(newSkipped.values());
+        newSkipped.delete(activeStep);
+      }
+      setActiveStep((prevActiveStep) => prevActiveStep + 1);
+      setSkipped(newSkipped);
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-    setSkipped(newSkipped);
   };
 
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleReset = () => {
-    setActiveStep(0);
+  const validateStep = () => {
+    let tempErrors = {};
+
+    if (activeStep === 1 && !name.trim()) {
+      tempErrors.name = "Name is required";
+    }
+    if (activeStep === 2 && !specialty) {
+      tempErrors.specialty = "Specialty is required";
+    }
+    if (activeStep === 3 && !role) {
+      tempErrors.role = "Role is required";
+    }
+    if (activeStep === 4 && !clinicianCount) {
+      tempErrors.clinicianCount = "Clinician count is required";
+    }
+
+    setErrors(tempErrors);
+    return Object.keys(tempErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateStep()) return;
+    try {
+      const response = await axios.post(`${API_MAIN_URL}/api/createQuestion`, {
+        display_name: name,
+        specialty,
+        role,
+        praction: clinicianCount,
+      }, {
+        withCredentials: true,
+      });
+      console.log(name,specialty,role,clinicianCount);
+      toast.success(response.data.message || "Registration successful!");
+      navigate("/dashboard");
+    } catch (error) {
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.message || "An error occurred.");
+      } else {
+        toast.error("An error occurred.");
+      }
+    }
   };
 
   const getStepContent = (step) => {
@@ -94,6 +137,12 @@ const OnboardingUI = () => {
             <Box
               component="input"
               placeholder="Your name"
+              value={name}
+              onChange={(e) => {
+                const inputValue = e.target.value;
+                const onlyLetters = inputValue.replace(/[^a-zA-Z\s]/g, "");
+                setName(onlyLetters);
+              }}
               sx={{
                 width: { xs: "100%", sm: "350px" },
                 borderRadius: "10px",
@@ -101,11 +150,16 @@ const OnboardingUI = () => {
                 fontSize: "16px",
                 backgroundColor: "white",
                 color: "black",
-                border: "none",
+                border: errors.name ? "1px solid #DC3545" : "none",
                 outline: "none",
                 boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
               }}
             />
+            {errors.name && (
+              <Typography color="#DC3545" fontSize="14px">
+                {errors.name}
+              </Typography>
+            )}
           </Box>
         );
       case 2:
@@ -120,21 +174,20 @@ const OnboardingUI = () => {
               Tailor your notes to your specialty
             </Typography>
             <FormControl size="small" sx={{ m: 1, minWidth: 250 }}>
-              <InputLabel id="specialty-select-label"></InputLabel>
               <Select
                 labelId="specialty-select-label"
+                displayEmpty
                 id="specialty-select"
                 value={specialty}
-                displayEmpty
-                onChange={handleSpecialtyChange}
-                inputProps={{ "aria-label": "Without label" }}
+                onChange={(e) => setSpecialty(e.target.value)}
                 sx={{
                   borderRadius: "10px",
                   backgroundColor: "white",
+                  border: errors.specialty ? "1px solid #DC3545" : "none",
                 }}
               >
                 <MenuItem value="">
-                  <em>Your Specialty</em>
+                  <em>Select your Specialty</em>
                 </MenuItem>
                 <MenuItem value="Cardiology">Cardiology</MenuItem>
                 <MenuItem value="Neurology">Neurology</MenuItem>
@@ -143,6 +196,11 @@ const OnboardingUI = () => {
                 <MenuItem value="Pediatrics">Pediatrics</MenuItem>
               </Select>
             </FormControl>
+            {errors.specialty && (
+              <Typography color="#DC3545" fontSize="14px">
+                {errors.specialty}
+              </Typography>
+            )}
           </Box>
         );
       case 3:
@@ -157,29 +215,37 @@ const OnboardingUI = () => {
               What best describes your role?
             </Typography>
             <FormControl size="small" sx={{ m: 1, minWidth: 250 }}>
-              <InputLabel id="specialty-select-label"></InputLabel>
               <Select
-                labelId="specialty-select-label"
-                id="specialty-select"
-                value={specialty}
+                labelId="role-select-label"
                 displayEmpty
-                onChange={handleSpecialtyChange}
-                inputProps={{ "aria-label": "Without label" }}
+                id="role-select"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 sx={{
                   borderRadius: "10px",
                   backgroundColor: "white",
+                  border: errors.role ? "1px solid #DC3545" : "none",
                 }}
               >
                 <MenuItem value="">
-                  <em>Your Role</em>
+                  <em>Select your Role</em>
                 </MenuItem>
-                <MenuItem value="Cardiology">Cardiology</MenuItem>
-                <MenuItem value="Neurology">Neurology</MenuItem>
-                <MenuItem value="Orthopedics">Orthopedics</MenuItem>
-                <MenuItem value="Dermatology">Dermatology</MenuItem>
-                <MenuItem value="Pediatrics">Pediatrics</MenuItem>
+                <MenuItem value="Physician">Physician</MenuItem>
+                <MenuItem value="Nurse Practitioner">
+                  Nurse Practitioner
+                </MenuItem>
+                <MenuItem value="Physician Assistant">
+                  Physician Assistant
+                </MenuItem>
+                <MenuItem value="Resident">Resident</MenuItem>
+                <MenuItem value="Medical Student">Medical Student</MenuItem>
               </Select>
             </FormControl>
+            {errors.role && (
+              <Typography color="#DC3545" fontSize="14px">
+                {errors.role}
+              </Typography>
+            )}
           </Box>
         );
       case 4:
@@ -194,29 +260,33 @@ const OnboardingUI = () => {
               How many clinicians work in your practice or department?
             </Typography>
             <FormControl size="small" sx={{ m: 1, minWidth: 250 }}>
-              <InputLabel id="specialty-select-label"></InputLabel>
               <Select
-                labelId="specialty-select-label"
-                id="specialty-select"
-                value={specialty}
+                labelId="clinician-count-label"
                 displayEmpty
-                onChange={handleSpecialtyChange}
-                inputProps={{ "aria-label": "Without label" }}
+                id="clinician-count-select"
+                value={clinicianCount}
+                onChange={(e) => setClinicianCount(e.target.value)}
                 sx={{
                   borderRadius: "10px",
                   backgroundColor: "white",
+                  border: errors.clinicianCount ? "1px solid #DC3545" : "none",
                 }}
               >
                 <MenuItem value="">
-                  <em>Select How many?</em>
+                  <em>Select</em>
                 </MenuItem>
-                <MenuItem value="Cardiology">Cardiology</MenuItem>
-                <MenuItem value="Neurology">Neurology</MenuItem>
-                <MenuItem value="Orthopedics">Orthopedics</MenuItem>
-                <MenuItem value="Dermatology">Dermatology</MenuItem>
-                <MenuItem value="Pediatrics">Pediatrics</MenuItem>
+                <MenuItem value="1-5">1-5</MenuItem>
+                <MenuItem value="6-10">6-10</MenuItem>
+                <MenuItem value="11-20">11-20</MenuItem>
+                <MenuItem value="21-50">21-50</MenuItem>
+                <MenuItem value="50+">50+</MenuItem>
               </Select>
             </FormControl>
+            {errors.clinicianCount && (
+              <Typography color="#DC3545" fontSize="14px">
+                {errors.clinicianCount}
+              </Typography>
+            )}
           </Box>
         );
       case 5:
@@ -310,19 +380,19 @@ const OnboardingUI = () => {
           {/* Message Box */}
           {activeStep === steps.length - 1 ? (
             <Paper
-              sx={{
-                p: 3,
-                maxWidth: 500,
-                backgroundColor: "#333",
-                color: "#fff",
-                borderRadius: 4,
-                textAlign: "center",
-              }}
+            // sx={{
+            //   p: 3,
+            //   maxWidth: 500,
+            //   backgroundColor: "#333",
+            //   color: "#fff",
+            //   borderRadius: 4,
+            //   textAlign: "center",
+            // }}
             >
-              <Typography>All steps completed - you're finished</Typography>
+              {/* <Typography>All steps completed - you're finished</Typography>
               <Button onClick={handleReset} sx={{ mt: 2 }} variant="contained">
                 Reset
-              </Button>
+              </Button> */}
             </Paper>
           ) : (
             <Paper
@@ -331,8 +401,8 @@ const OnboardingUI = () => {
                 mt: 5,
                 width: 500,
                 maxWidth: 500,
-                height: 200,
-                maxHeight: 200,
+                height: 220,
+                maxHeight: 220,
                 backgroundColor: "#333",
                 color: "#fff",
                 borderRadius: 4,
@@ -353,7 +423,9 @@ const OnboardingUI = () => {
                 )}
                 <Box sx={{ flex: "1 1 auto" }} />
                 <Button
-                  onClick={handleNext}
+                  onClick={
+                    activeStep === steps.length - 2 ? handleSubmit : handleNext
+                  }
                   variant="contained"
                   size="small"
                   sx={{ bgcolor: "white", color: "black" }}
@@ -423,7 +495,7 @@ const OnboardingUI = () => {
               <Typography>support@support.com</Typography>
             </Box>
             <Box display="flex" alignItems="center" mb={3}>
-            <Email fontSize="small" sx={{ mr: 1 }} />
+              <Email fontSize="small" sx={{ mr: 1 }} />
               <Typography>Message us on 'X'</Typography>
             </Box>
 

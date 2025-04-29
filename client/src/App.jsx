@@ -1,15 +1,16 @@
 import React from "react";
 import { HashRouter as Router, Routes, Route } from "react-router-dom";
-import Login from "./components/Login";
-import Signup from "./components/Signup";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 // import Register from "./components/Register";
 import Dashboard from "./pages/Dashboard";
 import DefaultRoute from "./pages/DefaultRoute";
 import {  ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ProtectedRoute from "./pages/ProtectedRoute";
-import OnboardingUI from "./components/OnBoarding";
+import OnboardingUI from "./pages/Onboarding";
 import './App.css'
+import Admin from "./pages/Admin";
 function App() {
   return (
     <Router>
@@ -33,6 +34,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="/onboarding" element={<OnboardingUI />} />
         {/* <Route path="/register" element={<Register />} /> */}
 
