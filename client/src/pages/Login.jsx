@@ -278,6 +278,15 @@ const handleSubmit= async (e)=>{
             >
               Sign up
             </Button>
+
+            <Button
+              size="small"
+              variant="contained"
+              sx={{ backgroundColor: "grey", ml: 2, py: 0, fontFamily: "Montserrat, sans-serif" }}
+              onClick={() => navigate('/admin')}
+            >
+              Admin
+            </Button>
           </Box>
 
           {/* Privacy Policy */}

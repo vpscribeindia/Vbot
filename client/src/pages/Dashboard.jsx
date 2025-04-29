@@ -9,7 +9,7 @@ import ReactAudioPlayer from 'react-audio-player';
 import { toast } from "react-toastify";
 const API_MAIN_URL=import.meta.env.VITE_API_URL;
 const socket = io(API_MAIN_URL);
-
+import BillingPopup from "../components/Bill";
 //only for testing purpose
 // const token="";
 const Dashboard = () => {
@@ -33,6 +33,9 @@ const Dashboard = () => {
 
   const [templates, setTemplates] = useState([]);
   const [Templatevalue, setTemplatevalue] = useState("");
+  const [remainingMinutes, setremainingMinutes] = useState("");
+
+
 
   const API_URL = `${API_MAIN_URL}/api/transcribe`;
   const PROGRESS_API_URL = `${API_MAIN_URL}/api/progress`;
@@ -51,11 +54,12 @@ const Dashboard = () => {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [editedName, setEditedName] = useState("");
+
   const navigate = useNavigate();
   
   const handleLogout = async () => {
     await axios.get(`${API_MAIN_URL}/auth/logout`);
-    toast.success('Logged out!');
+    toast.error('Logged out Successfully!');
     navigate('/login');
   };
 
@@ -166,6 +170,27 @@ const Dashboard = () => {
         const response = await axios.get(GET_ALL_TEMPLATE_URL,{
           withCredentials: true
         });
+        const response1 = await axios.get(`${API_MAIN_URL}/api/getBillingByMinutes`,{
+          withCredentials: true
+        }
+      );
+      const minutes = Math.floor(response1.data.usage_limit / 60);
+      setremainingMinutes(minutes);
+
+      // ✅ Send mail only ONCE when minutes ≤ 10
+      if (minutes <= 10) {
+        try {
+          await axios.post(`${API_MAIN_URL}/auth/sendemail`, {
+            to: 'gokuldev@vpscribes.com',
+            subject: 'Plan Upgrade',
+            text: `Your plan will expire soon. Only ${minutes} minutes remaining. Please upgrade.`,
+          });
+          toast.success('Email sent');
+        } catch (err) {
+          console.error(err);
+          toast.error('Failed to send email');
+        }
+      }
         setJobStatuses(data);
           const list = response.data.templateNames || [];
           setTemplates(list);
@@ -245,6 +270,8 @@ const Dashboard = () => {
       
 
       setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
+      const minutes = Math.floor(data.usage_limit / 60);
+      setremainingMinutes(minutes);
       setUploadStatus("Upload successful!");
       setSelectedFiles([]);
       setPatientName("");
@@ -341,6 +368,8 @@ const Dashboard = () => {
         const { data } = await axios.post(API_URL, formData,{
           withCredentials: true,
         });
+        const minutes = Math.floor(data.usage_limit / 60);
+        setremainingMinutes(minutes);
         setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
 
       } catch (error) {
@@ -460,8 +489,6 @@ const uniqueSections = parsedTranscript
     )
   : [];
 
-
-  
   
   return (
     
@@ -469,6 +496,7 @@ const uniqueSections = parsedTranscript
         {/* Job Status Section */}
         <div className="lg:w-96 w-full p-4 max-h-screen overflow-y-auto bg-white shadow-lg rounded-lg">
       {/* Header */}
+      <div>Remaining Minutes : {(remainingMinutes) ? remainingMinutes : '0'}</div>
       <Box sx={{ typography: "h6",gutterBottom:true }}  className=" sticky top-0 bg-white py-5 z-50">
         Queued Files
       </Box>
@@ -590,7 +618,15 @@ const uniqueSections = parsedTranscript
       </Dialog>
 
         {/* Upload and Record Section */}
+        
         <div className="w-full p-4 bg-white shadow-lg rounded-lg max-h-screen overflow-y-auto">
+          <div className="text-end me-3">
+          <button className="mt-4 me-3">
+      <BillingPopup/>
+      </button>
+        <button onClick={handleLogout} className="mt-4 bg-red-500 text-white p-2 rounded" style={{cursor:'pointer'}}>
+        Logout
+      </button></div>
           <Card className="shadow-md rounded-lg sticky top-0 z-50">
             <CardContent>
               <Box sx={{ typography: "h6",fontWeight: "bold",textTransform: 'uppercase',gutterBottom:true }} >Upload & Transcribe</Box>
@@ -776,9 +812,7 @@ const uniqueSections = parsedTranscript
 
 )}
 
-<button onClick={handleLogout} className="mt-4 bg-red-500 text-white p-2 rounded">
-        Logout
-      </button>
+
         </div>
       </div>
     

@@ -56,6 +56,23 @@ const getBillingById = async (req, res) => {
   }
 };
 
+const getBillingByMinutes = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+    }
+    const userId = req.user.id;
+    const billing = await Billing.findOne({
+      where: { user_id: userId },
+      attributes: ['usage_limit'],
+    });
+    if (!billing) return res.status(404).json({ message: "Billing not found" });
+    res.status(200).json({usage_limit : billing.usage_limit});
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // Update billing record
 const updateBilling = async (req, res) => {
   try {
@@ -88,4 +105,5 @@ module.exports = {
   getBillingById,
   updateBilling,
   deleteBilling,
+  getBillingByMinutes,
 };

@@ -2,21 +2,26 @@ const { Userinfo, Billing } = require("../../../config/db");
 const moment = require("moment");
 
 const createUserInfo = async (req, res) => {
+    if (!req.user || !req.user.id) {
+        return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+      }
+
     try {
-        const { user_id, display_name, specialty, role, praction } = req.body;
+        const userId = req.user.id;
+        const {display_name, specialty, role, praction } = req.body;
 
         // ✅ First define dates
         const package_start_date = moment();
         const package_end_date = moment(package_start_date).add(7, "days");
 
-        const userInfo = await Userinfo.create({ user_id, display_name, specialty, role, praction });
+        const userInfo = await Userinfo.create({user_id:userId, display_name, specialty, role, praction });
 
         const billing = await Billing.create({
-            user_id,
+            user_id:userId,
             amount: "0",
-            status: "active",
-            payment_status: "paid", // Set it as paid since PayPal confirms
-            pakage_type: "trial",
+            // status: "active",
+            status: "paid", // Set it as paid since PayPal confirms
+            pakage_type: "basic",
             usage_limit: "3600",
             pakage_discription: "free trial",
             package_start_date: package_start_date.toDate(), // save as Date format

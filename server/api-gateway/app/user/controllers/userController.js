@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const { Op } = require("sequelize");
 const jwt = require("jsonwebtoken");
 const { User } = require("../../../config/db");
+const nodemailer = require('nodemailer');
 
 const signup = async (req, res) => {
     const { email, password } = req.body;
@@ -136,4 +137,29 @@ const protectedUser = async (req, res) => {
     });
 };
 
-module.exports = { signup, login, getUsers, updateUser, deleteUser, protectedUser };
+
+const sendEmail = async (req, res) => {
+    const { to, subject, text } = req.body;
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'gokuldev19072000@gmail.com',
+        pass: 'kkklgbrmxkxqtnim', 
+      },
+    });
+  
+    const mailOptions = {
+      from: 'gokuldev19072000@gmail.com',
+      to,
+      subject,
+      text,
+    };
+  
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      res.status(200).send('Email sent');
+    } catch (error) {
+      res.status(500).send('Failed to send email');
+    }
+};
+module.exports = { signup, login, getUsers, updateUser, deleteUser, protectedUser,sendEmail };

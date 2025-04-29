@@ -7,12 +7,13 @@ const {
     updateUserInfo,
     deleteUserInfo,
 } = require("../controllers/questionControllers");
+const authenticate = require('../../../middlewares/authHandler');
 
 const router = express.Router();
 
-router.post("/createQuestion", createUserInfo);
-router.get("/getQuestion", getUserInfo);
-router.put("/updateQuestion:id", updateUserInfo);
-router.delete("/deleteQuestion:id", deleteUserInfo);
+router.post("/createQuestion",authenticate, createUserInfo);
+router.get("/getQuestion", authenticate, getUserInfo);
+router.put("/updateQuestion:id",authenticate,  updateUserInfo);
+router.delete("/deleteQuestion:id",authenticate,  deleteUserInfo);
 
 module.exports = router;
