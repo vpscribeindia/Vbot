@@ -154,17 +154,18 @@ if (updated === 0) {
 }
 const sendEmail = async (req, res) => {
     const { to, subject, text } = req.body;
+    const email_user = process.env.EMAIL_USER;
+    const email_pass = process.env.EMAIL_APP_PASS;
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'gokuldev19072000@gmail.com',
-        // pass: 'kkklgbrmxkxqtnim', 
-        pass:'kknpcczrgsdtrydm',
+        user: email_user,
+        pass:email_pass,
       },
     });
   
     const mailOptions = {
-      from: 'gokuldev19072000@gmail.com',
+      from: email_user,
       to,
       subject,
       text,
