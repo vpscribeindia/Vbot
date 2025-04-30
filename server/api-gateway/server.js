@@ -9,7 +9,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const fileRoutes = require('./app/files-transcriptions/routes/fileRoute');
 const transcriptRoutes = require('./app/files-transcriptions/routes/transcriptRoute');
-const authRoutes = require('./app/authenticator/google/routes/authRoute');
+const authRoutes = require('./app/authenticator/routes/authRoute');
 const questionRoutes = require('./app/question/routes/questionRoute');
 const userRoutes = require('./app/user/routes/userRoute');
 const billingRoutes = require('./app/billing/routes/billingRouter');
@@ -62,7 +62,7 @@ app.use('/api', transcriptRoutes);
 //authRoutes
 app.use('/api', authRoutes);
 app.use('/api', questionRoutes);
-app.use('/auth', userRoutes);
+app.use('/api', userRoutes);
 app.use('/auth', authRoutes);
 
 

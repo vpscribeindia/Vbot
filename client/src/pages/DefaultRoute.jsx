@@ -7,13 +7,20 @@ const DefaultRoute = () => {
   const [redirectTo, setRedirectTo] = useState("/login");
 
   useEffect(() => {
-    const API_MAIN_URL=import.meta.env.VITE_API_URL;
+    const API_MAIN_URL = import.meta.env.VITE_API_URL;
 
-    // Send a request to check if the token is valid, but we rely on cookies.
     axios
-      .get(`${API_MAIN_URL}/auth/protected`, { withCredentials: true }) // Important: `withCredentials: true` ensures the cookie is sent
-      .then(() => {
-        setRedirectTo("/dashboard");
+      .get(`${API_MAIN_URL}/auth/protected`, { withCredentials: true })
+      .then((res) => {
+        const status = res.data.user?.status;
+
+        if (status === "inactive") {
+          setRedirectTo("/onboarding");
+        } else if (status === "active") {
+          setRedirectTo("/dashboard");
+        } else {
+          setRedirectTo("/login"); 
+        }
       })
       .catch(() => {
         setRedirectTo("/login");

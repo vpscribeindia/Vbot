@@ -1,87 +1,5 @@
-const bcrypt = require("bcrypt");
-const { Op } = require("sequelize");
-const jwt = require("jsonwebtoken");
+
 const { User } = require("../../../config/db");
-const nodemailer = require('nodemailer');
-
-const signup = async (req, res) => {
-    const { email, password } = req.body;
-
-
-    if (!email || !password) {
-        return res.status(400).json({ message: "All fields are required" });
-    }
-
-    try {
-        // 🔥 First check if user already exists
-        const existingUser = await User.findOne({ where: { email } });
-
-        if (existingUser) {
-            return res.status(409).json({ message: "User already exists" }); // 409 Conflict
-        }
-
-        // 🛡️ If not, create new user
-        const hashedPassword = await bcrypt.hash(password, 10);
-
-        const newUser = await User.create({
-            email,
-            password: hashedPassword,
-            status : "inactive",
-
-        });
-
-        res.status(201).json({ message: "User created successfully", user: newUser });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
-
-
-const login = async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
-    }
-
-    try {
-        // Find user by email
-        const user = await User.findOne({ where: { email } });
-
-        if (!user) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        // Ensure user has a password (Google users may not have one)
-        if (!user.password) {
-            return res.status(401).json({ message: "This account is registered with Google. Please log in using Google." });
-        }
-
-        // Compare password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(401).json({ message: "Invalid credentials" });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign(
-            { id: user.id, email: user.email, },
-            process.env.JWT_SECRET,
-            { expiresIn: "24h" }
-        );
-        res.cookie('accessToken', token, {
-            httpOnly: true,
-            secure: false, // set true if https
-            sameSite: 'Strict',
-            maxAge: 3600000, // 1 hour
-        }).json({ message: 'Login successful' });
-        // res.status(200).json({ message: "Login successful", token });
-    } catch (error) {
-        console.error("Login Error:", error);
-        res.status(500).json({ message: "Server error" });
-    }
-};
 
 
 const getUsers = async (req, res) => {
@@ -132,36 +50,8 @@ const deleteUser = async (req, res) => {
     }
 };
 
-const protectedUser = async (req, res) => {
-    res.json({
-        message: 'This is protected data!',
-        user: req.user,
-    });
-};
+
+  
 
 
-const sendEmail = async (req, res) => {
-    const { to, subject, text } = req.body;
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'gokuldev19072000@gmail.com',
-        pass: 'kkklgbrmxkxqtnim', 
-      },
-    });
-  
-    const mailOptions = {
-      from: 'gokuldev19072000@gmail.com',
-      to,
-      subject,
-      text,
-    };
-  
-    try {
-      const info = await transporter.sendMail(mailOptions);
-      res.status(200).send('Email sent');
-    } catch (error) {
-      res.status(500).send('Failed to send email');
-    }
-};
-module.exports = { signup, login, getUsers, updateUser, deleteUser, protectedUser,sendEmail };
+module.exports = { getUsers, updateUser, deleteUser };

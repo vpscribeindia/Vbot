@@ -36,19 +36,24 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/admin" element={<Admin />} />
-        <Route path="/onboarding" element={<OnboardingUI />} />
-        {/* <Route path="/register" element={<Register />} /> */}
+          <Route
+    path="/dashboard"
+    element={
+      <ProtectedRoute allowedStatus="active">
+        <Dashboard />
+      </ProtectedRoute>
+    }
+  />
 
-        {/* Protected Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
+  <Route
+    path="/onboarding"
+    element={
+      <ProtectedRoute allowedStatus="inactive">
+        <OnboardingUI />
+      </ProtectedRoute>
+    }
+  />
 
-          }
-        />
 
       </Routes>
     </Router>
