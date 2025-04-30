@@ -29,7 +29,7 @@ async function uploadFile(req, res, next) {
     const activeBilling = await Billing.findOne({
       where: {
         user_id: userId,
-        status: 'paid',
+        status: 'active',
         package_end_date: { [Op.gt]: new Date() }
       },
       order: [['package_start_date', 'DESC']]

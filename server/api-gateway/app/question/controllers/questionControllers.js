@@ -3,23 +3,27 @@ const moment = require("moment");
 
 const createUserInfo = async (req, res) => {
     try {
-        const { user_id, display_name, specialty, role, praction } = req.body;
+        if (!req.user || !req.user.id) {
+            return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+          }
+          const userId = req.user.id;
+        const {display_name, specialty, role, praction } = req.body;
 
         // ✅ Validate required fields
-        if (!user_id || !display_name || !specialty || !role || !praction) {
+        if (!userId || !display_name || !specialty || !role || !praction) {
             return res.status(400).json({
-                message: "All fields (user_id, display_name, specialty, role, praction) are required"
+                message: "All fields (userId, display_name, specialty, role, praction) are required"
             });
         }
 
         // ✅ Check if user exists
-        const user = await User.findByPk(user_id);
+        const user = await User.findByPk(userId);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
         // ✅ Create user info
-        const userInfo = await Userinfo.create({ user_id, display_name, specialty, role, praction });
+        const userInfo = await Userinfo.create({user_id: userId, display_name, specialty, role, praction });
 
         // ✅ Define trial dates
         const package_start_date = moment();
@@ -27,7 +31,7 @@ const createUserInfo = async (req, res) => {
 
         // ✅ Create billing
         const billing = await Billing.create({
-            user_id,
+            user_id: userId,
             amount: "0",
             status: "active",
             payment_status: "paid",

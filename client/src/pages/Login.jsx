@@ -86,7 +86,7 @@ const handleSubmit= async (e)=>{
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            display:{xs:"none", md:"block"}
+            display:{xs:"none", md:"block"},
           }}
         >
           <Box
