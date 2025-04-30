@@ -58,4 +58,5 @@ DB_POOL_MIN=0
 DB_POOL_ACQUIRE=30000
 DB_POOL_IDLE=10000
 
+
 (*** NOTE : FIRST CONFIGURE .env files with your api keys ***)
