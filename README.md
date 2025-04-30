@@ -1,5 +1,7 @@
 CLIENT START - ./client/
+   npm install (first time)
     npm run dev
+
 MICROSERVICE START 
 1) in powershell run as administrator(For Windows only)
 Run :
@@ -55,7 +57,4 @@ DB_POOL_MIN=0
 DB_POOL_ACQUIRE=30000
 DB_POOL_IDLE=10000
 
-5) Finally client start - ./client/worker-service/
-   npm install (first time)
-   npm run dev
 (*** NOTE : FIRST CONFIGURE .env files with your api keys ***)
