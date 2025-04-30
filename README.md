@@ -38,7 +38,8 @@ DB_POOL_ACQUIRE=30000
 DB_POOL_IDLE=10000
 FRONTEND_URL=http://localhost:5173/
 REDIRECT_DOMAIN=http://localhost
-
+EMAIL_APP_PASS=ask team
+EMAIL_USER=ask team
 4) worker-service start - ./server/worker-service/
    npm install (first time)
    npm start

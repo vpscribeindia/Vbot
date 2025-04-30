@@ -2,7 +2,7 @@ const express = require("express");
 const { sendEmail,createStatus,useremailfind,updateStatus, getolddate, updatedate, getuserid, getemailstatus } = require("../controllers/emailController");
 
 const router = express.Router();
-const authenticate = require('../../../middlewares/authHandler');
+const {authenticate }= require('../../../middlewares/authHandler');
 router.post("/sendemail", authenticate,sendEmail);
 router.post("/addstatus", authenticate,createStatus);
 router.get("/emailfind", authenticate,useremailfind);
