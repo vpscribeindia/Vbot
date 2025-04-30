@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Box,
   Button,
@@ -15,24 +16,24 @@ import {
 
 const plans = [
   {
-    name: "Free",
+    name: "trial",
     price: "$0/mo",
-    features: ["1 User", "1GB Storage", "Community Support"],
+    // features: ["1 User", "1GB Storage", "Community Support"],
   },
   {
-    name: "Basic",
+    name: "basic",
     price: "$9/mo",
-    features: ["5 Users", "10GB Storage", "Email Support"],
+    // features: ["5 Users", "10GB Storage", "Email Support"],
   },
   {
-    name: "Standard",
+    name: "standard",
     price: "$19/mo",
-    features: ["10 Users", "100GB Storage", "Priority Support"],
+    // features: ["10 Users", "100GB Storage", "Priority Support"],
   },
   {
-    name: "Premium",
+    name: "premium",
     price: "$49/mo",
-    features: ["Unlimited Users", "1TB Storage", "24/7 Phone Support"],
+    // features: ["Unlimited Users", "1TB Storage", "24/7 Phone Support"],
   },
 ];
 
@@ -40,8 +41,30 @@ const BillingPopup = () => {
   const [open, setOpen] = useState(false);
 
   // Assume you fetch user's current plan from API (hardcoding here for example)
-  const currentPlan = "Free";
+  // const currentPlan = "Free";
+  const API_MAIN_URL=import.meta.env.VITE_API_URL;
+  const GET_BILLING_URL = `${API_MAIN_URL}/api/getBillingById`;
 
+  const [currentPlan, setCurrentPlan] = useState("");
+
+useEffect(() => {
+  const fetchBillingStatus = async () => {
+    try {
+      const response = await axios.get(`${GET_BILLING_URL}`, {
+        withCredentials: true,
+      });
+      console.log(response);
+      setCurrentPlan(response.data.pakage_type);
+    } catch (error) {
+      console.error("Error fetching billing status:", error);
+      setCurrentPlan("");
+    }
+  };
+
+  fetchBillingStatus();
+}, []);
+
+  
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -98,13 +121,13 @@ const BillingPopup = () => {
                           sx={{ position: "absolute", top: 10, right: 10 }}
                         />
                       )}
-                      <Typography variant="h6" fontWeight="bold" mb={1}>
+                      <Typography variant="h6" fontWeight="bold" mt={1} mb={1} textTransform={"capitalize"}>
                         {plan.name}
                       </Typography>
                       <Typography variant="h4" color="primary" mb={2}>
                         {plan.price}
                       </Typography>
-                      {plan.features.map((feature, index) => (
+                      {/* {plan.features.map((feature, index) => (
                         <Typography
                           key={index}
                           variant="body2"
@@ -112,7 +135,7 @@ const BillingPopup = () => {
                         >
                           • {feature}
                         </Typography>
-                      ))}
+                      ))} */}
                       <Button
                         variant="contained"
                         sx={{ mt: 3 }}

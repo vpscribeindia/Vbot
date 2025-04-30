@@ -48,7 +48,11 @@ const getAllBilling = async (req, res) => {
 // Get a single billing record
 const getBillingById = async (req, res) => {
   try {
-    const billing = await Billing.findByPk(req.params.id);
+      if (!req.user || !req.user.id) {
+          return res.status(401).json({ error: "Unauthorized: Missing user ID" });
+        }
+        const userId = req.user.id;
+    const billing = await Billing.findOne({where:{user_id:userId},attributes:['pakage_type']});
     if (!billing) return res.status(404).json({ message: "Billing not found" });
     res.status(200).json(billing);
   } catch (error) {
