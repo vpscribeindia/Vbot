@@ -1,7 +1,9 @@
 const Redis = require('ioredis');
 const subscriber = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: null });
+const { socketAuth } = require('../../../middlewares/authHandler');
 
 function setupSocket(io) {
+  io.use(socketAuth);
   subscriber.subscribe('progress', 'progress_transcript', (err) => {
     if (err) console.error('Redis subscribe error:', err);
   });

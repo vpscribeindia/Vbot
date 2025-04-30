@@ -9,7 +9,7 @@ const {
     deleteBilling,
     getBillingByMinutes,
 } = require("../controllers/billingController");
-const authenticate = require('../../../middlewares/authHandler');
+const {authenticate} = require('../../../middlewares/authHandler');
 const router = express.Router();
 
 router.post("/createBilling", createBilling);

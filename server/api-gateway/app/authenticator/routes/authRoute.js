@@ -1,6 +1,6 @@
 const express = require("express");
 const { googleAuth, googleCallback, signup,login, logout,protectedUser } = require("../controllers/authController");
-const authenticate = require('../../../middlewares/authHandler');
+const {authenticate} = require('../../../middlewares/authHandler');
 const router = express.Router();
 
 // Google Authentication

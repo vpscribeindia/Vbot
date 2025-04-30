@@ -7,7 +7,7 @@ const {
     updateUserInfo,
     deleteUserInfo,
 } = require("../controllers/questionControllers");
-const authenticate = require('../../../middlewares/authHandler');
+const {authenticate} = require('../../../middlewares/authHandler');
 
 const router = express.Router();
 

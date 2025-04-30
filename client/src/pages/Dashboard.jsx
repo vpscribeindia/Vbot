@@ -8,7 +8,9 @@ import { motion } from "framer-motion";
 import ReactAudioPlayer from 'react-audio-player';
 import { toast } from "react-toastify";
 const API_MAIN_URL=import.meta.env.VITE_API_URL;
-const socket = io(API_MAIN_URL);
+export const socket = io(API_MAIN_URL, {
+  withCredentials: true
+});
 import BillingPopup from "../components/Bill";
 //only for testing purpose
 // const token="";
