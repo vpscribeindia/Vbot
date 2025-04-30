@@ -176,23 +176,103 @@ const Dashboard = () => {
           withCredentials: true
         }
       );
-      const minutes = convertTime(response1.data.usage_limit);
+      const minutes =convertTime(response1.data.usage_limit);
+      
       setremainingMinutes(minutes);
+      const convertedMinutes = extractMinutes(minutes);
+        
+      try{
+        const response3 = await axios.get(`${API_MAIN_URL}/api/getuserid`,{
+          withCredentials: true,
+        })
+if(!response3.data || !response3.data.userid){
+  const formatted = dayjs().format('YYYY-MM-DD HH:mm:ss');
+  try{
+  await axios.post(`${API_MAIN_URL}/api/addstatus`,{
+    date: formatted,
+    withCredentials: true,
+  })
+  }catch(error){
+    console.error("Error :", error);
+  }
+}
+        }catch(error){
+          console.error("Error adding status :", error);
+        }
 
-      // ✅ Send mail only ONCE when minutes ≤ 10
-      // if (minutes <= 10) {
-      //   try {
-      //     await axios.post(`${API_MAIN_URL}/auth/sendemail`, {
-      //       to: 'gokuldev@vpscribes.com',
-      //       subject: 'Plan Upgrade',
-      //       text: `Your plan will expire soon. Only ${minutes} minutes remaining. Please upgrade.`,
-      //     });
-      //     toast.success('Email sent');
-      //   } catch (err) {
-      //     console.error(err);
-      //     toast.error('Failed to send email');
-      //   }
-      // }
+
+        try{
+          const response4 = await axios.get(`${API_MAIN_URL}/api/getuserid`,{
+            withCredentials: true,
+          })
+          if(response4.data && response4.data.userid){
+            const response2 = await axios.get(`${API_MAIN_URL}/api/getolddate`,{
+              withCredentials: true,
+            })
+          const todayDate = dayjs().format('YYYY-MM-DD');
+          const oldDate = dayjs(response2.data.date).format('YYYY-MM-DD');
+          if(oldDate !== todayDate ){
+            await axios.put(`${API_MAIN_URL}/api/updatedate`,{
+              date:todayDate,
+              status : 'notsent',
+              withCredentials: true,
+            }
+          );
+          }
+          }
+        }catch(error){
+          console.error("Error getting user :", error);
+        }
+
+
+        try{
+          const response5 = await axios.get(`${API_MAIN_URL}/api/getemailstatus`,{
+    withCredentials: true,
+
+          });
+          const emailstatus = response5.data.status;
+    
+if(emailstatus == 'notsent'){
+let tomail= '';
+try{
+   const response5 = await axios.get(`${API_MAIN_URL}/api/emailfind`,{
+    withCredentials: true,
+  })
+  tomail =  response5.data.email.User.email;
+
+
+}
+catch(error){
+  console.error("Error in date :", error);
+}
+      if (convertedMinutes <= 10) {
+        try {
+          await axios.post(`${API_MAIN_URL}/api/sendemail`, {
+            
+            to: tomail,
+            subject: 'Plan Upgrade',
+            text: `Your plan will expire soon. Only ${minutes} remaining. Please upgrade.`,
+          });
+
+  try{
+ await axios.put(`${API_MAIN_URL}/api/updatestatus`, 
+      { status: 'sent' }, 
+      { withCredentials: true }
+    );
+  }catch(error){
+    console.error("Error updating status :", error);
+
+  }
+          
+        } catch (err) {
+          console.error(err);
+
+        }
+      }
+    }
+    }catch(error){
+      console.error("Error in status :", error);
+    }
         setJobStatuses(data);
           const list = response.data.templateNames || [];
           setTemplates(list);
@@ -420,7 +500,10 @@ const Dashboard = () => {
     return result.join(" ");
     
   }
-      
+  const extractMinutes = (timeStr) => {
+    const match = timeStr.match(/(\d+)\s*min/); 
+    return match ? parseInt(match[1], 10) : 0;
+  };
 const handleTranscriptChange = (e, sectionIndex) => {
   const { name, value } = e.target;
   const key = `${sectionIndex}_${name}`;

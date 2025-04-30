@@ -13,7 +13,7 @@ const authRoutes = require('./app/authenticator/routes/authRoute');
 const questionRoutes = require('./app/question/routes/questionRoute');
 const userRoutes = require('./app/user/routes/userRoute');
 const billingRoutes = require('./app/billing/routes/billingRouter');
-
+const emailRoutes = require('./app/email/routes/emailRoute');
 const errorHandler = require('./middlewares/errorHandler');
 
 const setupSocket = require('./app/files-transcriptions/services/socketService');
@@ -65,7 +65,7 @@ app.use('/api', questionRoutes);
 app.use('/api', userRoutes);
 app.use('/auth', authRoutes);
 
-
+app.use('/api', emailRoutes);
 
 app.use('/api', billingRoutes);
 

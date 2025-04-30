@@ -5,9 +5,10 @@ const User = require('./models/user');
 const Userinfo = require('./models/userInfo');
 const Billing = require('./models/billing');
 const Template = require('./models/template');
+const EmailStatus = require('./models/emailstatus');
 const { Op } = require('sequelize');
 
-const db = { sequelize, Op, File, Transcript, User, Userinfo, Billing, Template };
+const db = { sequelize, Op, File, Transcript, User, Userinfo, Billing, Template,EmailStatus };
 
 async function initializeDatabase() {
   try {
@@ -26,6 +27,8 @@ async function initializeDatabase() {
     User.hasOne(Userinfo, { foreignKey: 'user_id' });
     Userinfo.belongsTo(User, { foreignKey: 'user_id' });
 
+    User.hasOne(EmailStatus, { foreignKey: 'user_id' });
+    EmailStatus.belongsTo(User, { foreignKey: 'user_id' });
 
 //    await Template.create({
 //       templateName: 'SOAP General Notes',
