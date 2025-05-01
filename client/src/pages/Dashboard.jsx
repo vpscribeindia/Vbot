@@ -11,7 +11,9 @@ const API_MAIN_URL=import.meta.env.VITE_API_URL;
 export const socket = io(API_MAIN_URL, {
   withCredentials: true
 });
-import BillingPopup from "../components/Bill";
+
+import Header from "../components/admin/Header";
+
 import moment from 'moment';
 
 //only for testing purpose
@@ -61,11 +63,6 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
   
-  const handleLogout = async () => {
-    await axios.get(`${API_MAIN_URL}/auth/logout`);
-    toast.error('Logged out Successfully!');
-    navigate('/login');
-  };
 
 
   const handleEditClick = (job) => {
@@ -207,7 +204,6 @@ const Dashboard = () => {
             })
           const todayDate = moment().format('YYYY-MM-DD');
           const oldDate = moment(response2.data.date).format('YYYY-MM-DD');
-          console.log(oldDate);
           if(oldDate !== todayDate ){
             await axios.put(`${API_MAIN_URL}/api/updatedate`,{
               date:moment().format('YYYY-MM-DD HH:mm:ss'),
@@ -325,14 +321,25 @@ catch(error){
     }
     setUploadStatus("");
 
+    
   };
  
   const handleUpload = async () => {
+    if (!PatientName.trim()) {
+      toast.error('Patient name is required');
+      return;
+    }
+    const file = fileInputRef.current?.files[0];
+    if (!file) {
+      toast.error('Please select a file.');
+      return;
+    }
     if (selectedFiles.length === 0 || PatientName === "" || Templatevalue === "" ) return;
     setUploadStatus("Uploading and processing...");
     if (fileInputRef.current) {
         fileInputRef.current.value = null; 
       }
+
 
     const formData = new FormData();
     formData.append("audioFiles", selectedFiles[0]);
@@ -707,15 +714,11 @@ const uniqueSections = parsedTranscript
 
         {/* Upload and Record Section */}
         
-        <div className="w-full p-4 bg-white shadow-lg rounded-lg max-h-screen overflow-y-auto">
-          <div className="text-end me-3">
-          <button className="mt-4 me-3">
-      <BillingPopup/>
-      </button>
-        <button onClick={handleLogout} className="mt-4 bg-red-500 text-white p-2 rounded" style={{cursor:'pointer'}}>
-        Logout
-      </button></div>
-          <Card className="shadow-md rounded-lg sticky top-0 z-50">
+        <div className="w-full bg-white shadow-lg  max-h-screen overflow-y-auto">
+
+          <Header variant="user"/>
+
+          <Card className="shadow-md rounded-lg sticky top-0">
             <CardContent>
               <Box sx={{ typography: "h6",fontWeight: "bold",textTransform: 'uppercase',gutterBottom:true }} >Upload & Transcribe</Box>
               <div className="mb-3">

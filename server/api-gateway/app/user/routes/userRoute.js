@@ -4,9 +4,9 @@ const { getUsers, updateUser, deleteUser } = require("../controllers/userControl
 const router = express.Router();
 const {authenticate} = require('../../../middlewares/authHandler');
 
-router.get("/users",getUsers);
+router.get("/users",authenticate,getUsers);
 router.put("/updateUsers", authenticate,updateUser);
-router.delete("/deleteUsers",deleteUser);
+router.delete("/deleteUsers",authenticate,deleteUser);
 
 
 

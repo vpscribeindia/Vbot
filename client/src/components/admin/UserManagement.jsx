@@ -18,7 +18,9 @@ const UserManagement = () => {
     setLoading(true);
     setError(null);
     axios
-      .get("http://localhost:3000/api/users")
+      .get("http://localhost:3000/api/users",{
+        withCredentials: true
+      })
       .then((res) => setUsers(res.data))
       .catch((err) => {
         console.error("Failed to fetch users:", err);
@@ -35,7 +37,10 @@ const UserManagement = () => {
     axios
       .delete(`http://localhost:3000/api/deleteUsers`,{
         data: { id: deleteUserId },
-      })
+        
+      },{ withCredentials: true}
+    )
+
       .then(() => {
         fetchUsers();
         toast.error("User Deleted");

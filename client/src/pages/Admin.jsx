@@ -27,7 +27,7 @@ function Admin() {
             sidebarOpen ? "ml-64" : "ml-20"
           }`}
         >
-          <Header />
+          <Header variant="admin" />
 
           <main className="p-6">
             {view === "users" && <UserManagement />}

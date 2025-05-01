@@ -1,18 +1,54 @@
-import React, { useState } from "react";
+import React, { useState,useEffect} from "react";
 import RobotLogo from "../../assets/Logo.png";
+import axios from 'axios';
+import { toast } from "react-toastify";
+import { useNavigate } from 'react-router-dom';
+import BillingPopup from '../Bill';
 
-const Header = () => {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  // Replace this with dynamic data if needed
-  const user = {
-    name: "Santhosh Kumar",
-    email: "sample@gmail.com",
-    photo: "", // Leave empty to test fallback
+const API_MAIN_URL=import.meta.env.VITE_API_URL;
+const Header = ({variant}) => {
+
+  const navigate = useNavigate();
+  const baseClasses = "shadow";
+  const bgClass =
+  variant === "admin"
+      ? "bg-white dark:bg-gray-900"
+      : "bg-white dark:bg-gray-500";
+
+  const handleLogout = async () => {
+    await axios.get(`${API_MAIN_URL}/auth/logout`,{
+      withCredentials: true
+    });
+    toast.error('Logged out Successfully!');
+    navigate('/login');
   };
-
+  const [user, setUser] = useState({
+    name: "",
+    email: "",
+    photo: "",
+  });
+  const fetchUsers = () => {
+    axios
+      .get("http://localhost:3000/api/users")
+      .then((res) => {
+        const firstUser = res.data[0]; // or find current logged-in user
+        setUser({
+          name: firstUser?.Userinfo?.display_name || firstUser?.name || "",
+          email: firstUser?.email || "",
+          photo: firstUser?.photo || "",
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to fetch users:", err);
+      });
+  };
+  // ✅ call fetchUsers when component mounts
+  useEffect(() => {
+    fetchUsers();
+  }, []);
   return (
-    <nav className="bg-white border-b border-gray-200 dark:bg-gray-900 shadow">
+    <nav className={`${baseClasses} ${bgClass}`}>
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo */}
         <div className="flex items-center space-x-3">
@@ -21,17 +57,16 @@ const Header = () => {
             alt="Logo"
             className="h-10"
           />
-          <span className="text-2xl font-semibold dark:text-white">
+          <span className="text-2xl font-semibold  dark:text-white">
             VBOT AI
           </span>
         </div>
 
         {/* User Avatar & Dropdown */}
-        <div className="relative">
+        <div className="relative group">
           <button
             type="button"
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-10 h-10 bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 flex items-center justify-center overflow-hidden"
+            className="w-10 h-10 bg-gray-800 rounded-full focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600 flex items-center justify-center overflow-hidden cursor-pointer" 
           >
             {user.photo ? (
               <img
@@ -40,7 +75,7 @@ const Header = () => {
                 className="w-10 h-10 rounded-full object-cover"
               />
             ) : (
-              <span className="text-white text-sm font-semibold uppercase">
+              <span className="text-white text-sm font-semibold uppercase" >
                 {user.name
                   ?.split(" ")  
                   .map((n) => n[0])
@@ -52,8 +87,8 @@ const Header = () => {
           </button>
 
 
-          {dropdownOpen && (
-            <div className="absolute right-0 z-50 mt-2 w-48 bg-white rounded-lg shadow-md dark:bg-gray-700">
+   
+            <div className="absolute right-0 z-50 mt-2 w-48 bg-white rounded-lg shadow-md dark:bg-gray-700 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
               <div className="px-4 py-3">
                 <span className="block text-sm text-gray-900 dark:text-white">
                   {user.name}
@@ -62,18 +97,18 @@ const Header = () => {
                   {user.email}
                 </span>
               </div>
+              <BillingPopup />
               <ul className="py-2">
                 <li>
                   <a
-                    href="#"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
-                  >
+                    onClick={handleLogout} >
                     Sign out
                   </a>
                 </li>
               </ul>
             </div>
-          )}
+ 
         </div>
       </div>
     </nav>
