@@ -18,7 +18,7 @@ const UserManagement = () => {
     setLoading(true);
     setError(null);
     axios
-      .get("http://localhost:3000/auth/users")
+      .get("http://localhost:3000/api/users")
       .then((res) => setUsers(res.data))
       .catch((err) => {
         console.error("Failed to fetch users:", err);
@@ -33,7 +33,9 @@ const UserManagement = () => {
 
   const handleDelete = () => {
     axios
-      .delete(`http://localhost:3000/api/users/${deleteUserId}`)
+      .delete(`http://localhost:3000/api/deleteUsers`,{
+        data: { id: deleteUserId },
+      })
       .then(() => {
         fetchUsers();
         toast.error("User Deleted");
@@ -49,8 +51,8 @@ const UserManagement = () => {
 
   const handleSave = (formData) => {
     const request = editingUser
-      ? axios.put(`http://localhost:5000/api/users/${editingUser.id}`, formData)
-      : axios.post("http://localhost:5000/api/users", formData);
+      ? axios.put(`http://localhost:3000/api/updateUsers/${editingUser.id}`, formData)
+      : axios.post("http://localhost:3000/api/users", formData);
 
     request
       .then(() => {

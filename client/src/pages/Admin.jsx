@@ -1,8 +1,8 @@
 // src/App.jsx
 import { useState } from 'react';
-import Header from '../components/Header';
-import Sidebar from '../components/Sidebar';
-import UserManagement from '../components/UserManagement';
+import Header from '../components/admin/Header';
+import Sidebar from '../components/admin/Sidebar';
+import UserManagement from '../components/admin/UserManagement';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

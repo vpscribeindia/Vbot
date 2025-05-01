@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import RobotLogo from "../assets/Logo.png";
+import RobotLogo from "../../assets/Logo.png";
 
 const Header = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);

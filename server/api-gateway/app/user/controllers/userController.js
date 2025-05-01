@@ -1,10 +1,14 @@
 
-const { User } = require("../../../config/db");
+const { User, Userinfo } = require("../../../config/db");
 
 
 const getUsers = async (req, res) => {
     try {
-        const users = await User.findAll({ attributes: { exclude: ["password"] } });
+        const users = await User.findAll({ attributes: { exclude: ["password"] },
+            include: [{
+            model: Userinfo,
+            attributes: ['display_name'],
+          }] });
         res.status(200).json(users);
     } catch (error) {
         res.status(500).json({ message: "Server error" });
@@ -38,17 +42,18 @@ const updateUser = async (req, res) => {
 
 
 const deleteUser = async (req, res) => {
-    const { id } = req.body;
+    const { id } = req.body; // ✅ works for POST
     try {
-        const user = await User.findByPk(id);
-        if (!user) return res.status(404).json({ message: "User not found" });
-
-        await user.destroy();
-        res.status(200).json({ message: "User deleted successfully" });
+      const user = await User.findByPk(id);
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      await user.destroy();
+      res.status(200).json({ message: "User deleted successfully" });
     } catch (error) {
-        res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Server error" });
     }
-};
+  };
+  
 
 
   

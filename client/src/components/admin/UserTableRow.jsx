@@ -17,19 +17,19 @@ const UserTableRow = ({
       <td className="px-4 py-2">
         <AvatarCircle name={user.name} photo={user.photo} />
       </td>
-      <td className="px-4 py-2">{user.name}</td>
+      <td className="px-4 py-2">{user.Userinfo.display_name}</td>
       <td className="px-4 py-2">{user.email}</td>
-      <td className="px-4 py-2">{user.role}</td>
+      {/* <td className="px-4 py-2">{user.role}</td> */}
       <td className="px-4 py-2 space-x-2 text-center">
         <button onClick={() => handleEdit(user.id)}>
           <FaEdit className="inline text-yellow-500" />
         </button>
-        <button
+        {/* <button
           onClick={handlePassword}
           title="Change Password"
         >
           <FaKey className="inline text-indigo-500" />
-        </button>
+        </button> */}
         <button onClick={() => handleDelete(user.id)}>
           <FaTrash className="inline text-red-500" />
         </button>

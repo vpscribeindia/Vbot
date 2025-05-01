@@ -12,7 +12,7 @@ const UserTable = ({ users, onEdit, onDelete, onPassword }) => {
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Photo</th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Name</th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Email</th>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th>
+              {/* <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th> */}
               <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>

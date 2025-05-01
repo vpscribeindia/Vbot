@@ -12,10 +12,12 @@ const UserFormModal = ({ user, onClose, onSave }) => {
 
   useEffect(() => {
     if (user) {
-      const { name, email, username, role, photo } = user;
+      const { email, username, role, photo } = user;
+      const name = user.Userinfo?.display_name || user.name || "";
       setForm({ name, email, username, role, photo });
-    }    
+    }
   }, [user]);
+  
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -62,7 +64,7 @@ const UserFormModal = ({ user, onClose, onSave }) => {
             onChange={handleChange}
             required
           />
-          <input
+          {/* <input
             type="text"
             name="username"
             placeholder="Username"
@@ -87,7 +89,7 @@ const UserFormModal = ({ user, onClose, onSave }) => {
             className="w-full p-2 border rounded"
             value={form.photo}
             onChange={handleChange}
-          />
+          /> */}
           <div className="flex justify-end space-x-2">
             <button
               type="button"
