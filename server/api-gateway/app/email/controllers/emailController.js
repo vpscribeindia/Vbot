@@ -1,24 +1,35 @@
 const { EmailStatus,User,Userinfo,Op } = require("../../../config/db");
 const nodemailer = require('nodemailer');
-const createStatus = async (req, res) => {
+const moment = require('moment');
 
+const createStatus = async (req, res) => {
+  
   try{
-    const  {date}  = req.body;
     if (!req.user || !req.user.id) {
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
     
-    const userId = req.user.id;
 
-        const emailstatus = await EmailStatus.create({
-          user_id:userId,
-          date:date,
-          status:'notsent'
-        });
-    res.status(201).json({ message : emailstatus });
+    const userId = req.user.id;
+    // const user = await EmailStatus.findOne({
+    //   where:{user_id:userId},
+    //   attributes: ['user_id'],
+      
+    // });
+    // if(!user){
+      const  {date}  = req.body;
+      const formattedDate = moment.utc(date).local().format('YYYY-MM-DD HH:mm:ss');
+      const add =await EmailStatus.create({
+        user_id:userId,
+        date:formattedDate,
+        status:'notsent'
+      });
+      
+      return res.status(201).json({ message : add});
+    // }
 
   }catch(error){
-    res.status(500).json({ message: error.message });
+   return  res.status(500).json({ message: error.message });
   }
 }
 
@@ -27,6 +38,7 @@ const updateStatus = async (req, res) => {
   try{
 
     const userId = req.user.id;
+    
     const { status } = req.body;  
     const [updated] = await EmailStatus.update(
       { status },
@@ -89,13 +101,19 @@ const getolddate = async(req,res) => {
 }
 const getuserid = async(req,res) => {
   try{
-    const user = await EmailStatus.findOne({
-      attributes: ['user_id'],
-    });
-    if (!user) {
-      return res.status(200).json({ userid: null }); 
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
-    res.status(201).json({ userid : user.user_id });
+    const userId = req.user.id;
+    const user1 = await EmailStatus.findOne({
+      attributes: ['user_id'],
+      where: { user_id: userId },
+
+    });
+    if (!user1) {
+      return res.status(200).json({ error: 'user id missing' }); 
+    }
+    res.status(201).json({ userid : user1.user_id });
 
   }
   catch(error){
@@ -132,18 +150,16 @@ const updatedate = async(req,res) => {
       return res.status(401).json({ error: "Unauthorized: Missing user ID" });
     }
     const userId = req.user.id;
- const { date,status } = req.body;  
 
- const [updated] = await EmailStatus.update(
-  { date, status },
+ const { date,status } = req.body;  
+ const formattedDate = moment.utc(date).local().format('YYYY-MM-DD HH:mm:ss');
+ const updated = await EmailStatus.update(
+  { date:formattedDate, status },
   { where: { user_id: userId } }
 );
 
-if (updated === 0) {
-  return res.status(404).json({ message: 'User not found' });
-}
 
-    res.status(201).json({ message : updated });
+res.status(201).json({ message : updated });
 
   }
   catch(error){
@@ -172,7 +188,7 @@ const sendEmail = async (req, res) => {
     };
   
     try {
-      const info = await transporter.sendMail(mailOptions);
+      await transporter.sendMail(mailOptions);
       res.status(200).send('Email sent');
     } catch (error) {
       res.status(500).send('Failed to send email');

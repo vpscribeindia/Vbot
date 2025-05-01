@@ -12,6 +12,8 @@ export const socket = io(API_MAIN_URL, {
   withCredentials: true
 });
 import BillingPopup from "../components/Bill";
+import moment from 'moment';
+
 //only for testing purpose
 // const token="";
 const Dashboard = () => {
@@ -181,57 +183,53 @@ const Dashboard = () => {
       setremainingMinutes(minutes);
       const convertedMinutes = extractMinutes(minutes);
         
-      try{
-        const response3 = await axios.get(`${API_MAIN_URL}/api/getuserid`,{
-          withCredentials: true,
-        })
-if(!response3.data || !response3.data.userid){
-  const formatted = dayjs().format('YYYY-MM-DD HH:mm:ss');
-  try{
-  await axios.post(`${API_MAIN_URL}/api/addstatus`,{
-    date: formatted,
+  
+
+     
+  const response2 = await axios.get(`${API_MAIN_URL}/api/getuserid`,{
     withCredentials: true,
+  })
+  if(!response2.data || !response2.data.userid){
+      try{
+  const formatted = moment().format('YYYY-MM-DD HH:mm:ss');
+  await axios.post(`${API_MAIN_URL}/api/addstatus`,{
+    date: formatted},
+    {withCredentials: true,
   })
   }catch(error){
     console.error("Error :", error);
   }
-}
-        }catch(error){
-          console.error("Error adding status :", error);
-        }
-
-
+  }
+  else if(response2.data && response2.data.userid){
         try{
-          const response4 = await axios.get(`${API_MAIN_URL}/api/getuserid`,{
-            withCredentials: true,
-          })
-          if(response4.data && response4.data.userid){
             const response2 = await axios.get(`${API_MAIN_URL}/api/getolddate`,{
               withCredentials: true,
             })
-          const todayDate = dayjs().format('YYYY-MM-DD');
-          const oldDate = dayjs(response2.data.date).format('YYYY-MM-DD');
+          const todayDate = moment().format('YYYY-MM-DD');
+          const oldDate = moment(response2.data.date).format('YYYY-MM-DD');
+          console.log(oldDate);
           if(oldDate !== todayDate ){
             await axios.put(`${API_MAIN_URL}/api/updatedate`,{
-              date:todayDate,
-              status : 'notsent',
-              withCredentials: true,
+              date:moment().format('YYYY-MM-DD HH:mm:ss'),
+              status : 'notsent'},
+              {withCredentials: true,
             }
           );
-          }
           }
         }catch(error){
           console.error("Error getting user :", error);
         }
+  }
 
 
+  if (convertedMinutes <= 10) {
         try{
           const response5 = await axios.get(`${API_MAIN_URL}/api/getemailstatus`,{
     withCredentials: true,
 
           });
           const emailstatus = response5.data.status;
-    
+  
 if(emailstatus == 'notsent'){
 let tomail= '';
 try{
@@ -239,20 +237,18 @@ try{
     withCredentials: true,
   })
   tomail =  response5.data.email.User.email;
-
-
 }
 catch(error){
   console.error("Error in date :", error);
 }
       if (convertedMinutes <= 10) {
         try {
-          await axios.post(`${API_MAIN_URL}/api/sendemail`, {
+          // await axios.post(`${API_MAIN_URL}/api/sendemail`, {
             
-            to: tomail,
-            subject: 'Plan Upgrade',
-            text: `Your plan will expire soon. Only ${minutes} remaining. Please upgrade.`,
-          });
+          //   to: tomail,
+          //   subject: 'Plan Upgrade',
+          //   text: `Your plan will expire soon. Only ${minutes} remaining. Please upgrade.`,
+          // });
 
   try{
  await axios.put(`${API_MAIN_URL}/api/updatestatus`, 
@@ -270,9 +266,10 @@ catch(error){
         }
       }
     }
-    }catch(error){
-      console.error("Error in status :", error);
-    }
+  }catch(error){
+    console.error("Error in status :", error);
+  }
+}
         setJobStatuses(data);
           const list = response.data.templateNames || [];
           setTemplates(list);
@@ -501,9 +498,15 @@ catch(error){
     
   }
   const extractMinutes = (timeStr) => {
-    const match = timeStr.match(/(\d+)\s*min/); 
-    return match ? parseInt(match[1], 10) : 0;
+    const hrMatch = timeStr.match(/(\d+)\s*hr/);
+    const minMatch = timeStr.match(/(\d+)\s*min/);
+  
+    const hours = hrMatch ? parseInt(hrMatch[1], 10) : 0;
+    const minutes = minMatch ? parseInt(minMatch[1], 10) : 0;
+  
+    return hours * 60 + minutes;
   };
+  
 const handleTranscriptChange = (e, sectionIndex) => {
   const { name, value } = e.target;
   const key = `${sectionIndex}_${name}`;

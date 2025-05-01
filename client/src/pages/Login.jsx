@@ -48,9 +48,7 @@ const handleSubmit= async (e)=>{
       } catch (err) {
         toast.error("Invalid email or password.");
       }
-  console.log('Form Data:', email,password);
-  // setEmail("")
-  // setPassword("")
+
 
 }
   return (

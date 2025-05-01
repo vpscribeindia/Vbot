@@ -40,7 +40,7 @@ const plans = [
 const BillingPopup = () => {
   const [open, setOpen] = useState(false);
 
-  // Assume you fetch user's current plan from API (hardcoding here for example)
+
   // const currentPlan = "Free";
   const API_MAIN_URL=import.meta.env.VITE_API_URL;
   const GET_BILLING_URL = `${API_MAIN_URL}/api/getBillingById`;
@@ -53,7 +53,7 @@ useEffect(() => {
       const response = await axios.get(`${GET_BILLING_URL}`, {
         withCredentials: true,
       });
-      console.log(response);
+
       setCurrentPlan(response.data.pakage_type);
     } catch (error) {
       console.error("Error fetching billing status:", error);

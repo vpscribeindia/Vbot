@@ -111,6 +111,14 @@ const OnboardingUI = () => {
     }
   };
 
+  
+  const handleLogout = async () => {
+    await axios.get(`${API_MAIN_URL}/auth/logout`);
+    toast.error('Logged out Successfully!');
+    navigate('/login');
+  };
+
+
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -337,12 +345,25 @@ const OnboardingUI = () => {
         >
           {/* Logo */}
           <Box
-            sx={{
-              alignSelf: "flex-start",
-              m: 2,
-            }}
-          >
+  sx={{
+    display: "flex",
+    justifyContent: "space-between", // pushes content to ends
+    alignItems: "center",
+    width: "100%", // full width of parent
+    p: 2,
+  }}
+>
             <img src={Logo} alt="VBot" width={80} />
+            <Box >
+                  <Button
+                    onClick={handleLogout}
+                    size="small"
+                    variant="contained"
+                    sx={{ backgroundColor: "black", mr: "1" }}
+                  >
+                    Logout 
+                  </Button>
+                  </Box>
           </Box>
 
           {/* Stepper */}
