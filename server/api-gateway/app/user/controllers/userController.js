@@ -19,11 +19,19 @@ const getUsers = async (req, res) => {
 };
 const getUserById = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findByPk(id, {
-            attributes: { exclude: ["password"] }
-        });
-
+        // const { id } = req.params;
+        // const user = await User.findByPk(id, {
+        //     attributes: { exclude: ["password"] }
+        // });
+        const userId =req.user.id;
+  const user = await Userinfo.findOne({
+  where: { user_id: userId },
+  attributes: ['display_name'],
+  include: [{
+    model: User,
+    attributes: ['email']}]
+});
+console.log(user);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }

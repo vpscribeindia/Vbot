@@ -29,16 +29,15 @@ const Header = ({variant}) => {
     photo: "",
   });
   const fetchUsers = () => {
-    axios
-      .get("http://localhost:3000/api/users")
-      .then((res) => {
-        const firstUser = res.data[0]; // or find current logged-in user
-        setUser({
-          name: firstUser?.Userinfo?.display_name || firstUser?.name || "",
-          email: firstUser?.email || "",
-          photo: firstUser?.photo || "",
-        });
-      })
+axios
+  .get("http://localhost:3000/api/usersId", { withCredentials: true })
+  .then((res) => {
+    const data = res.data;
+    setUser({
+      name: data.display_name,
+      email: data.User.email,
+    });
+  })
       .catch((err) => {
         console.error("Failed to fetch users:", err);
       });
