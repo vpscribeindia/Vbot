@@ -10,7 +10,7 @@ const getUsers = async (req, res) => {
         const users = await User.findAll({ attributes: { exclude: ["password"] },
             include: [{
             model: Userinfo,
-            attributes: ['display_name'],
+            attributes: ['display_name','specialty','role','praction'],
           }] });
         res.status(200).json(users);
     } catch (error) {
@@ -34,6 +34,24 @@ const getUserById = async (req, res) => {
     }
 };
 
+const updatePassword = async (req, res) => {
+
+    try{
+      const {id, password } = req.body;  
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const updated = await User.update(
+        { password:hashedPassword },
+        { where: { id: id } }
+      );
+  
+      
+      res.status(201).json({ message : updated });
+  
+    }catch{
+      res.status(500).json({ message : 'error updating password' });
+    }
+  }
+
 const updateUser = async (req, res) => {
     const { id, display_name, email } = req.body;
   
@@ -56,11 +74,7 @@ const updateUser = async (req, res) => {
       await user.save();
   
       res.status(200).json({
-        message: "User updated successfully",
-        user: {
-          email: user.email,
-          display_name: userinfo ? userinfo.display_name : null
-        }
+        message: "User updated successfully"
       });
       
     } catch (error) {
@@ -184,4 +198,4 @@ const updateAdminUser = async (req, res) => {
 };
 
 
-module.exports = { getUsers,getUserById, updateUser, deleteUser,getAdminAllUsers ,updateAdminUser };
+module.exports = { getUsers,getUserById, updateUser, deleteUser,getAdminAllUsers ,updateAdminUser,updatePassword };

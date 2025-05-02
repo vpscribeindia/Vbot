@@ -9,10 +9,12 @@ const UserTable = ({ users, onEdit, onDelete, onPassword }) => {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gradient-to-r from-gray-100 to-gray-50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Photo</th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Name</th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Email</th>
-              {/* <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th> */}
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Specialty</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Role</th>
+              <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">Praction</th>
+
               <th className="px-6 py-4 text-center text-xs font-bold text-gray-600 uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -23,7 +25,7 @@ const UserTable = ({ users, onEdit, onDelete, onPassword }) => {
                 user={user}
                 index={index}
                 handleEdit={() => onEdit(user)}
-                handlePassword={() => alert(`Change password for user ID ${user.id}`)}
+                handlePassword={() => onPassword(user.id)}
                 handleDelete={() => onDelete(user.id)}
                 isFirst={index === 0}
                 isLast={index === users.length - 1}

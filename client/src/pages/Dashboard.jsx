@@ -334,6 +334,13 @@ catch(error){
       toast.error('Please select a file.');
       return;
     }
+    const allowedExtensions = ['wav', 'mp3', 'm4a'];
+   const fileExtension = file.name.split('.').pop().toLowerCase();
+
+ if (!allowedExtensions.includes(fileExtension)) {
+  toast.error('Only .wav, .mp3, .m4a files are allowed.');
+  return;
+}
     if (selectedFiles.length === 0 || PatientName === "" || Templatevalue === "" ) return;
     setUploadStatus("Uploading and processing...");
     if (fileInputRef.current) {

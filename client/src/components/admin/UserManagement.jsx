@@ -13,7 +13,15 @@ const UserManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [deleteUserId, setDeleteUserId] = useState(null);
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordModal, setPasswordModal] = useState(null);
 
+  const validatePassword = (password) => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
   const fetchUsers = () => {
     setLoading(true);
     setError(null);
@@ -77,10 +85,35 @@ const UserManagement = () => {
   };
   
 
-  const handlePassword = (id) => {
-    alert(`Change password for user ID ${id}`);
+  const handleSubmit = async (e) => {
+e.preventDefault()
+try{
+if(password !== confirmPassword){
+  toast.error('Password should match');
+  setPassword('')
+  setConfirmPassword('')
+  return;
+}
+if (!validatePassword(password)) {
+        toast.error(
+          "Password must be at least 8 characters long include one lowercase letter, one uppercase letter, one number, and one special character."
+        );
+  setPassword('')
+  setConfirmPassword('')
+        return;
+      }
+const update = await axios.put(`http://localhost:3000/api/updatepassword`,
+  { id: passwordModal,password:password },
+        { withCredentials: true}
+);
+toast.success("Successfully Updated")
+setPasswordModal(null)
+}
+catch{
+  toast.error("Failed to update")
+}
   };
-
+  
   return (
     <div className="p-6">
       {/* Header */}
@@ -90,7 +123,7 @@ const UserManagement = () => {
         <div className="flex items-center gap-4">
 
           {/* Add User Button */}
-          <button
+          {/* <button
             onClick={() => {
               setEditingUser(null);
               setModalOpen(true);
@@ -99,7 +132,7 @@ const UserManagement = () => {
           >
             <FaPlus />
             Add User
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -116,7 +149,7 @@ const UserManagement = () => {
             users={users}
             onEdit={handleEdit}
             onDelete={(id) => setDeleteUserId(id)}
-            onPassword={handlePassword}
+            onPassword={(id)=>setPasswordModal(id)}
           />
         </div>
       )}
@@ -149,6 +182,52 @@ const UserManagement = () => {
               >
                 Delete
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
+            {/* password change Modal */}
+            {passwordModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm text-center">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Password Change</h3>
+
+            <div className="flex justify-center gap-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+          <input
+            type="password"
+            name="pass"
+            placeholder="Password"
+            className="w-full p-2 border rounded"
+            value={password}
+            onChange={(e)=>setPassword(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            name="cpass"
+            placeholder="Confirm Password"
+            className="w-full p-2 border rounded"
+            value={confirmPassword}
+            onChange={(e)=>setConfirmPassword(e.target.value)}
+            required
+          />
+              <button
+                className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded me-3"
+                onClick={() => setPasswordModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+              type="submit"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+
+              >
+                Change
+              </button>
+              </form>
             </div>
           </div>
         </div>
