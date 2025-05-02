@@ -33,30 +33,42 @@ const getUserById = async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 };
+
 const updateUser = async (req, res) => {
-    const { id, display_name, email } = req.body; // Get ID from the request body
-    //console.log("Request Body:", req.body); // Fix the logging issue
-
+    const { id, display_name, email } = req.body;
+  
     try {
-        const user = await User.findByPk(id);
-        //console.log("Fetched User:", user);
-
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
+      const user = await User.findByPk(id);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+  
+      // ✅ update User email
+      if (email) user.email = email;
+  
+      // ✅ update Userinfo display_name
+      const userinfo = await user.getUserinfo();
+      if (userinfo && display_name) {
+        userinfo.display_name = display_name;
+        await userinfo.save();
+      }
+  
+      await user.save();
+  
+      res.status(200).json({
+        message: "User updated successfully",
+        user: {
+          email: user.email,
+          display_name: userinfo ? userinfo.display_name : null
         }
-
-        // Update only if values are provided
-        if (display_name) user.display_name = display_name;
-        if (email) user.email = email;
-
-        await user.save();
-
-        res.status(200).json({ message: "User updated successfully", user });
+      });
+      
     } catch (error) {
-        console.error("Update Error:", error);
-        res.status(500).json({ message: "Server error" });
+      console.error("Update Error:", error);
+      res.status(500).json({ message: "Server error" });
     }
-};
+  };
+  
 
 
 const deleteUser = async (req, res) => {

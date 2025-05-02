@@ -55,10 +55,17 @@ const UserManagement = () => {
   };
 
   const handleSave = (formData) => {
+    // Map formData.name to display_name for backend
+    const payload = {
+      id: editingUser?.id,
+      email: formData.email,
+      display_name: formData.name,
+    };
+  
     const request = editingUser
-      ? axios.put(`http://localhost:3000/api/updateUsers/${editingUser.id}`, formData)
-      : axios.post("http://localhost:3000/api/users", formData);
-
+      ? axios.put(`http://localhost:3000/api/updateUsers`, payload, { withCredentials: true })
+      : axios.post("http://localhost:3000/api/users", formData, { withCredentials: true });
+  
     request
       .then(() => {
         fetchUsers();
@@ -66,8 +73,9 @@ const UserManagement = () => {
         setEditingUser(null);
         toast.success(editingUser ? "User Edited" : "User Added");
       })
-      .catch(() => showError("Failed to save user."));
+      .catch(() => toast.error("Failed to save user."));
   };
+  
 
   const handlePassword = (id) => {
     alert(`Change password for user ID ${id}`);
