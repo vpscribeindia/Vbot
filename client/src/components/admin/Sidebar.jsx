@@ -3,9 +3,10 @@ import {
   FaUsers,
   FaChevronDown,
   FaBars,
+  FaChartLine, // import icon for Logging & Monitoring
 } from "react-icons/fa";
 
-const Sidebar = ({ isOpen, toggleSidebar, setView, activeView}) => {
+const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
   const [userMgmtOpen, setUserMgmtOpen] = useState(false);
 
   const handleUserMenuClick = () => {
@@ -34,94 +35,103 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView}) => {
       <ul className="p-4 space-y-2 text-sm">
         {/* User Management */}
         <li className="group relative">
-  <button
-    onClick={handleUserMenuClick}
-    className="w-full flex items-center justify-between p-2 rounded hover:bg-gray-700 transition"
-  >
-    <div className="flex items-center space-x-3">
-      <FaUsers />
-      {isOpen && <span>User Management</span>}
-    </div>
-    {isOpen && (
-      <FaChevronDown
-        className={`transition-transform ${userMgmtOpen ? "rotate-180" : ""}`}
-      />
-    )}
-  </button>
+          <button
+            onClick={handleUserMenuClick}
+            className="w-full flex items-center justify-between p-2 rounded hover:bg-gray-700 transition"
+          >
+            <div className="flex items-center space-x-3">
+              <FaUsers />
+              {isOpen && <span>User Management</span>}
+            </div>
+            {isOpen && (
+              <FaChevronDown
+                className={`transition-transform ${
+                  userMgmtOpen ? "rotate-180" : ""
+                }`}
+              />
+            )}
+          </button>
 
-  {/* Hover tooltip + submenu for collapsed view */}
-  {!isOpen && (
-    <div className="absolute left-full top-0 ml-2 z-50 w-40 bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition duration-200">
-      <div className="text-xs font-semibold text-white px-3 py-2 border-b border-gray-600">
-        User Management
-      </div>
-      <ul className="py-1 text-sm text-white">
-        <li>
-        <button
-          onClick={() => setView("users")}
-          className={`block p-2 rounded w-full text-left transition-all ${
-            activeView === "users"
-              ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
-              : "hover:bg-gray-700 text-gray-300"
-          }`}
-        >
-          Users
-        </button>
+          {/* Hover tooltip + submenu for collapsed view */}
+          {!isOpen && (
+            <div className="absolute left-full top-0 ml-2 z-50 w-40 bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition duration-200">
+              <div className="text-xs font-semibold text-white px-3 py-2 border-b border-gray-600">
+                User Management
+              </div>
+              <ul className="py-1 text-sm text-white">
+                <li>
+                  <button
+                    onClick={() => setView("users")}
+                    className={`block p-2 rounded w-full text-left transition-all ${
+                      activeView === "users"
+                        ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
+                        : "hover:bg-gray-700 text-gray-300"
+                    }`}
+                  >
+                    Users
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setView("roles")}
+                    className={`block p-2 rounded w-full text-left transition-all ${
+                      activeView === "roles"
+                        ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
+                        : "hover:bg-gray-700 text-gray-300"
+                    }`}
+                  >
+                    Roles
+                  </button>
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* Expanded submenu when sidebar is open */}
+          {userMgmtOpen && isOpen && (
+            <ul className="pl-10 mt-2 space-y-1 text-gray-300">
+              <li>
+                <button
+                  onClick={() => setView("users")}
+                  className={`block p-2 rounded w-full text-left transition-all ${
+                    activeView === "users"
+                      ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
+                      : "hover:bg-gray-700 text-gray-300"
+                  }`}
+                >
+                  Users
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setView("roles")}
+                  className={`block p-2 rounded w-full text-left transition-all ${
+                    activeView === "roles"
+                      ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
+                      : "hover:bg-gray-700 text-gray-300"
+                  }`}
+                >
+                  Roles
+                </button>
+              </li>
+            </ul>
+          )}
         </li>
+
+        {/* Logging and Monitoring */}
         <li>
           <button
-            onClick={() => alert("Roles clicked")}
-            className="w-full text-left px-4 py-2 hover:bg-gray-700"
+            onClick={() => setView("userslogging")}
+            className={`w-full flex items-center space-x-3 p-2 rounded hover:bg-gray-700 transition ${
+              activeView === "logging"
+                ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
+                : "text-gray-300"
+            }`}
           >
-            Roles
+            <FaChartLine />
+            {isOpen && <span>Logging & Monitoring</span>}
           </button>
         </li>
-        <li>
-          {/* <button
-            onClick={() => alert("Permissions clicked")}
-            className="w-full text-left px-4 py-2 hover:bg-gray-700"
-          >
-            Permissions
-          </button> */}
-        </li>
-      </ul>
-    </div>
-  )}
-
-  {/* Expanded submenu when sidebar is open */}
-  {userMgmtOpen && isOpen && (
-    <ul className="pl-10 mt-2 space-y-1 text-gray-300">
-      <li>
-      <button
-          onClick={() => setView("users")}
-          className={`block p-2 rounded w-full text-left transition-all ${
-            activeView === "users"
-              ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
-              : "hover:bg-gray-700 text-gray-300"
-          }`}
-        >
-          Users
-        </button>
-      </li>
-      <li>
-        <button
-          onClick={() => alert("Roles clicked")}
-          className="block p-2 rounded hover:bg-gray-700 w-full text-left"
-        >
-          Roles
-        </button>
-      </li>
-      <li>
-        {/* <button
-          onClick={() => alert("Permissions clicked")}
-          className="block p-2 rounded hover:bg-gray-700 w-full text-left"
-        >
-          Permissions
-        </button> */}
-      </li>
-    </ul>
-  )}
-</li>
       </ul>
     </aside>
   );
