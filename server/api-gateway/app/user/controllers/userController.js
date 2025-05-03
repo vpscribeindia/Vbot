@@ -29,9 +29,9 @@ const getUserById = async (req, res) => {
   attributes: ['display_name'],
   include: [{
     model: User,
-    attributes: ['email']}]
+    attributes: ['email','role']}]
 });
-console.log(user);
+
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -61,25 +61,36 @@ const updatePassword = async (req, res) => {
   }
 
 const updateUser = async (req, res) => {
-    const { id, display_name, email } = req.body;
-  
+    
     try {
-      const user = await User.findByPk(id);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+        const { id, display_name, email,specialty,role,praction } = req.body;
+        const updateUser = await Userinfo.update(
+            {display_name:display_name,specialty:specialty,role:role,praction:praction},
+            { where: { user_id: id } }
+        )
+        const userInfo = await Userinfo.findOne({ where: { user_id: id } });
+        if (userInfo && userInfo.user_id) {
+            await User.update(
+              { email: email },
+              { where: { id: userInfo.user_id } }
+            );
+          }
+    //   const user = await User.findByPk(id);
+    //   if (!user) {
+    //     return res.status(404).json({ message: "User not found" });
+    //   }
   
-      // ✅ update User email
-      if (email) user.email = email;
+    //   // ✅ update User email
+    //   if (email) user.email = email;
   
-      // ✅ update Userinfo display_name
-      const userinfo = await user.getUserinfo();
-      if (userinfo && display_name) {
-        userinfo.display_name = display_name;
-        await userinfo.save();
-      }
+    //   // ✅ update Userinfo display_name
+    //   const userinfo = await user.getUserinfo();
+    //   if (userinfo && display_name) {
+    //     userinfo.display_name = display_name;
+    //     await userinfo.save();
+    //   }
   
-      await user.save();
+    //   await user.save();
   
       res.status(200).json({
         message: "User updated successfully"
@@ -91,7 +102,25 @@ const updateUser = async (req, res) => {
     }
   };
   
-
+const addUsers  = async (req,res)=>{
+    try{
+const {name,specialty,role,praction,email} = req.body;
+ const newUser = await User.create({ email:email });
+await Userinfo.create({
+    user_id: newUser.id,          
+    display_name:name,
+    specialty:specialty,
+    role:role,
+    praction:praction
+  });
+res.status(200).json({
+    message: "User added successfully"
+  });
+    }
+    catch{
+        res.status(500).json({ message: "Server error" });
+    }
+}
 
 const deleteUser = async (req, res) => {
     const { id } = req.body; // ✅ works for POST
@@ -206,4 +235,4 @@ const updateAdminUser = async (req, res) => {
 };
 
 
-module.exports = { getUsers,getUserById, updateUser, deleteUser,getAdminAllUsers ,updateAdminUser,updatePassword };
+module.exports = { getUsers,getUserById, updateUser, deleteUser,getAdminAllUsers ,updateAdminUser,updatePassword,addUsers };

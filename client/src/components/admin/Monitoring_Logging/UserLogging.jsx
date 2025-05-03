@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import axios from "axios";
-import UserFormModal from "./UserFormModal";
+// import UserFormModal from "./UserFormModal";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
 import UserLogTable from "./UserLogTable";

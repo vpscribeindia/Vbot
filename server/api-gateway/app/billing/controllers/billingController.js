@@ -1,4 +1,4 @@
-const { Billing } = require("../../../config/db");
+const { Billing,Userinfo,User } = require("../../../config/db");
 
 const moment = require("moment");
 
@@ -103,6 +103,32 @@ const deleteBilling = async (req, res) => {
   }
 };
 
+
+// User Billing
+
+const getUserBilling = async (req, res) => {
+    try {
+
+      const users = await Billing.findAll({
+        
+        include: [
+          {
+            model: User,
+            attributes: ['email'],
+            include: [{
+              model: Userinfo,
+              attributes: ['display_name']
+            }]
+          }
+        ]
+      });
+    
+        res.status(200).json(users);
+    }catch (error) {
+      console.error(error); // Add this line
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
 module.exports = {
   createBilling,
   getAllBilling,
@@ -110,4 +136,5 @@ module.exports = {
   updateBilling,
   deleteBilling,
   getBillingByMinutes,
+  getUserBilling
 };

@@ -26,7 +26,7 @@ const Header = ({variant}) => {
   const [user, setUser] = useState({
     name: "",
     email: "",
-    photo: "",
+    role: "",
   });
   const fetchUsers = () => {
 axios
@@ -36,6 +36,8 @@ axios
     setUser({
       name: data.display_name,
       email: data.User.email,
+      role: data.User.role,
+
     });
   })
       .catch((err) => {
@@ -96,7 +98,7 @@ axios
                   {user.email}
                 </span>
               </div>
-              <BillingPopup />
+              {user.role === 'user' ? <BillingPopup /> : ' '}
               <ul className="py-2">
                 <li>
                   <a

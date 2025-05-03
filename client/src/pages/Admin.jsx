@@ -2,10 +2,12 @@
 import { useState } from 'react';
 import Header from '../components/admin/Header';
 import Sidebar from '../components/admin/Sidebar';
-import UserManagement from '../components/admin/UserManagement';
+import UserManagement from '../components/admin/Managements/UserManagement';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import UserLogging from '../components/admin/UserLogging';
+import UserLogging from '../components/admin/Monitoring_Logging/UserLogging';
+import UserBilling from '../components/admin/Billings/UserBilling';
+
 
 function Admin() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -33,6 +35,8 @@ function Admin() {
           <main className="p-6">
             {view === "users" && <UserManagement />}
             {view === "userslogging" && <UserLogging />}
+            {view === "usersbilling" && <UserBilling />}
+
             {view === "dashboard" && (
               <h1 className="text-2xl font-bold">Welcome to the Dashboard</h1>
             )}

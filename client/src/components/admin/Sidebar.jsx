@@ -73,14 +73,14 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
                 </li>
                 <li>
                   <button
-                    onClick={() => setView("roles")}
+                    onClick={() => setView("usersbilling")}
                     className={`block p-2 rounded w-full text-left transition-all ${
-                      activeView === "roles"
+                      activeView === "usersbilling"
                         ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                         : "hover:bg-gray-700 text-gray-300"
                     }`}
                   >
-                    Roles
+                    User Billings
                   </button>
                 </li>
               </ul>
@@ -104,14 +104,14 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
               </li>
               <li>
                 <button
-                  onClick={() => setView("roles")}
+                  onClick={() => setView("usersbilling")}
                   className={`block p-2 rounded w-full text-left transition-all ${
-                    activeView === "roles"
+                    activeView === "usersbilling"
                       ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                       : "hover:bg-gray-700 text-gray-300"
                   }`}
                 >
-                  Roles
+                  User Billings
                 </button>
               </li>
             </ul>
@@ -123,7 +123,7 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
           <button
             onClick={() => setView("userslogging")}
             className={`w-full flex items-center space-x-3 p-2 rounded hover:bg-gray-700 transition ${
-              activeView === "logging"
+              activeView === "userslogging"
                 ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                 : "text-gray-300"
             }`}
