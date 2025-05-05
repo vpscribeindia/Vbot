@@ -57,10 +57,7 @@ const UserManagement = () => {
 
   const handleDelete = async() => {
    await axios
-      .delete(`http://localhost:3000/api/deleteUsers`,{
-        data: { id: deleteUserId },
-        
-      },{ withCredentials: true}
+      .delete(`http://localhost:3000/api/deleteUsers`,{ withCredentials: true}
     )
 
       .then(() => {
@@ -117,7 +114,7 @@ if (!validatePassword(password)) {
         return;
       }
  await axios.put(`http://localhost:3000/api/updatepassword`,
-  { id: passwordModal,password:password },
+  {password:password },
         { withCredentials: true}
 );
 toast.success("Successfully Updated")
@@ -133,7 +130,7 @@ catch{
 e.preventDefault()
 try{
  await axios.put(`http://localhost:3000/api/updateUsers`,
-  { id: editModal,display_name:uname,email:uemail,specialty:uspecialty,role:urole,praction:upraction },
+  {display_name:uname,email:uemail,specialty:uspecialty,role:urole,praction:upraction },
   { withCredentials: true}
 );
 fetchUsers();

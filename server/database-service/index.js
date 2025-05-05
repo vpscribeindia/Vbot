@@ -30,6 +30,7 @@ async function initializeDatabase() {
 
     User.hasOne(EmailStatus, { foreignKey: 'user_id' });
     EmailStatus.belongsTo(User, { foreignKey: 'user_id' });
+    
     User.hasOne(Userinfo, { foreignKey: 'user_id', as: 'profile' });
 
     //    await Template.create({

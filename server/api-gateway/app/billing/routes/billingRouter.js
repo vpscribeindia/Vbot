@@ -9,6 +9,7 @@ const {
     deleteBilling,
     getBillingByMinutes,
     getUserBilling,
+    updateUserBilling,
 } = require("../controllers/billingController");
 const {authenticate} = require('../../../middlewares/authHandler');
 const router = express.Router();
@@ -20,6 +21,8 @@ router.put("/updateBilling",authenticate, updateBilling);
 router.delete("/deleteBilling:id", deleteBilling);
 router.get("/getBillingByMinutes", authenticate,getBillingByMinutes);
 router.get("/getUserBilling", authenticate,getUserBilling);
+router.put("/updateUserBilling", authenticate,updateUserBilling);
+
 
 
 module.exports = router;

@@ -22,11 +22,6 @@ const ProtectedRoute = ({ children, allowedStatus = "active" }) => {
           ? allowedStatus
           : [allowedStatus];
 
-        // console.log("userStatus:", userStatus);
-        // console.log("userRole:", userRole);
-        // console.log("currentPath:", currentPath);
-        // console.log("allowed:", allowed);
-
         if (!allowed.includes(userStatus)) {
           if (userStatus === "inactive") return navigate("/onboarding");
           else return navigate("/login");
@@ -36,7 +31,6 @@ if (currentPath === "/") {
   return navigate("/dashboard");
 }
 
-// If a normal user tries to access /admin, block it
 if (userRole !== "admin" && currentPath.startsWith("/admin")) {
   return navigate("/dashboard");
 }
@@ -54,8 +48,6 @@ if (userRole !== "admin" && currentPath.startsWith("/admin")) {
 
   if (loading) return <div>Loading...</div>;
   if (!isAllowed) return null;
-
-  console.log("Rendering children");
   return children;
 }
 

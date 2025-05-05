@@ -45,11 +45,12 @@ const getUserById = async (req, res) => {
 const updatePassword = async (req, res) => {
 
     try{
-      const {id, password } = req.body;  
+        const user_id=req.user.id;
+      const {password } = req.body;  
       const hashedPassword = await bcrypt.hash(password, 10);
       const updated = await User.update(
         { password:hashedPassword },
-        { where: { id: id } }
+        { where: { id: user_id } }
       );
   
       
@@ -124,9 +125,9 @@ res.status(200).json({
 }
 
 const deleteUser = async (req, res) => {
-    const { id } = req.body; // ✅ works for POST
     try {
-      const user = await User.findByPk(id);
+        const userId = req.user.id; 
+      const user = await User.findByPk(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
   
       await user.destroy();

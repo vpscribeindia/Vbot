@@ -81,32 +81,32 @@ const getBillingByMinutes = async (req, res) => {
 const updateBilling = async (req, res) => {
   try {
     const userId = req.user.id;
-
     const billing = await Billing.findOne({ where: { user_id: userId } });
     if (!billing) return res.status(404).json({ message: "Billing not found" });
-
     const { pakage_type } = req.body;
-
-    let usage_limit;
+    let additionalUsage = 0;
     switch (pakage_type) {
       case "basic":
-        usage_limit = 10000;
+        additionalUsage = 10200;
         break;
       case "standard":
-        usage_limit = 30000;
+        additionalUsage = 30000;
         break;
       case "premium":
-        usage_limit = 99999;
+        additionalUsage = 99999;
         break;
       default:
-        usage_limit = billing.usage_limit;
+        additionalUsage = 0;
     }
-
+    const currentUsage = parseInt(billing.usage_limit, 10) || 0;
+    const newUsageLimit =
+      pakage_type === "premium"
+        ? 99999 // override for unlimited
+        : currentUsage + additionalUsage;
     await billing.update({
       pakage_type,
-      usage_limit,
+      usage_limit: newUsageLimit,
     });
-
     res.status(200).json({ message: "Billing updated", billing });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -154,6 +154,40 @@ const getUserBilling = async (req, res) => {
       res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+const updateUserBilling = async (req, res) => {
+    
+  try {
+    const userID = req.user.id;
+      const {amount, payment_status,package_type,package_start_date,package_end_date,usage_limit,status,email,display_name } = req.body;
+      const updateUser = await Billing.update(
+          {amount:amount,payment_status:payment_status,status:status,pakage_type:package_type,package_end_date:package_end_date,package_start_date:package_start_date,usage_limit:usage_limit},
+          { where: { user_id: userID } }
+      )
+      const userInfo = await Billing.findOne({ where: { user_id: userID } });
+      if (userInfo && userInfo.user_id) {
+        await Userinfo.update(
+          { display_name: display_name },
+          { where: { user_id: userInfo.user_id } }
+        );
+      }
+          const user = await Billing.findOne({ where: { user_id: userID } });
+      if (user && user.user_id) {
+          await User.update(
+            { email: email },
+            { where: { id: user.user_id } }
+          );
+        }
+
+
+    res.status(200).json({
+      message: "Billing User updated successfully" ,user:updateUser
+    });
+    
+  } catch (error) {
+    console.error("Update Error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 module.exports = {
   createBilling,
   getAllBilling,
@@ -161,5 +195,6 @@ module.exports = {
   updateBilling,
   deleteBilling,
   getBillingByMinutes,
-  getUserBilling
+  getUserBilling,
+  updateUserBilling
 };

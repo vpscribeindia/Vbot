@@ -1,27 +1,25 @@
 import React ,{useState,useEffect} from 'react'
 import UserBillingTable from "./UserBillingTable";
 import axios from 'axios';
+import {EditBillingUserModal}  from "./UserBillingFormModal";
+import moment from 'moment';
+import { toast } from "react-toastify";
+
+
 const UserBilling = () => {
   const [billingusers, setBillingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deleteUserId, setDeleteUserId] = useState(null);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [passwordModal, setPasswordModal] = useState(null);
   const [editModal, setEditModal] = useState(null);
-  const [addModal, setAddModal] = useState(null);
-  const [email, setEmail] = useState('');
-  const [name, setName] = useState('');
-  const [role, setRole] = useState('');
-  const [specialty, setSpecialty] = useState('');
-  const [praction, setPraction] = useState('');
   const [uemail, setuEmail] = useState('');
   const [uname, setuName] = useState('');
-  const [urole, setuRole] = useState('');
-  const [uspecialty, setuSpecialty] = useState('');
-  const [upraction, setuPraction] = useState('');
-
+  const [uamount, setuAmount] = useState('');
+  const [upstatus, setuPaymentStatus] = useState('');
+  const [uptype, setuPackageType] = useState('');
+  const [upsdate, setuPackageStart] = useState('');
+  const [upedate, setuPackageEnd] = useState('');
+  const [ulimit, setuLimit] = useState('');
+  const [ustatus, setuStatus] = useState('');
 
 
   const fetchBillingUsers = () => {
@@ -48,7 +46,21 @@ const UserBilling = () => {
     fetchBillingUsers();
   }, []);
 
-
+  const handleUpdate = async(e)=>{
+    e.preventDefault()
+    try{
+     await axios.put(`http://localhost:3000/api/updateUserBilling`,
+      {amount:uamount,payment_status:upstatus,status:ustatus,package_type:uptype,package_end_date:upedate,package_start_date:upsdate,usage_limit:ulimit,email:uemail,display_name:uname },
+      { withCredentials: true}
+    );
+    fetchBillingUsers();
+    toast.success("Billing User Updated Successfully")
+    setEditModal(null)
+    }
+    catch{
+      toast.error("Failed to update")
+    }
+      }
   return (
     <div className="p-4">
       {/* Header */}
@@ -56,15 +68,6 @@ const UserBilling = () => {
         <h2 className="text-3xl font-bold text-gray-800">User Billings</h2>
 
         <div className="flex items-center gap-4">
-
-          {/* <button
-            onClick={() => {
-              setAddModal(true);}}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-full transition cursor-pointer"
-          >
-            <FaPlus />
-            Add User
-          </button> */}
         </div>
       </div>
 
@@ -79,11 +82,51 @@ const UserBilling = () => {
         <div className="bg-white rounded-xl shadow-md p-4">
           <UserBillingTable
             billingusers={billingusers}
+            onEdit={(billingusers) => {
+              setuName(billingusers.User.Userinfo.display_name);  
+              setuEmail(billingusers.User.email);
+              setuAmount(billingusers.amount);
+              setuPaymentStatus(billingusers.payment_status);
+              setuPackageType(billingusers.pakage_type);
 
+              setuPackageStart(moment.parseZone(billingusers.package_start_date).format('YYYY-MM-DD HH:mm:ss'));
+              setuPackageEnd(moment.parseZone(billingusers.package_end_date).format('YYYY-MM-DD HH:mm:ss'));
+              setuLimit(billingusers.usage_limit);
+              setuStatus(billingusers.status);
+              setEditModal(billingusers.id);  
+            }}
           />
         </div>
       )}
 
+
+
+{/* Editmodal props */}
+
+{editModal && (
+  <EditBillingUserModal
+    uname={uname}
+    uemail={uemail}
+    uamount={uamount}
+    upstatus={upstatus}
+    uptype={uptype}
+    upsdate={upsdate}
+    upedate={upedate}
+    ulimit={ulimit}
+    ustatus={ustatus}
+    onChangeName={(e) => setuName(e.target.value)}
+    onChangeEmail={(e) => setuEmail(e.target.value)}
+    onChangeAmount={(e) => setuAmount(e.target.value)}
+    onChangePaymentStatus={(e) => setuPaymentStatus(e.target.value)}
+    onChangePackageType={(e) => setuPackageType(e.target.value)}
+    onChangePackageStart={(e) => setuPackageStart(e.target.value)}
+    onChangePackageEnd={(e) => setuPackageEnd(e.target.value)}
+    onChangeLimit={(e) => setuLimit(e.target.value)}
+    onChangeStatus={(e) => setuStatus(e.target.value)}
+    onCancel={() => setEditModal(null)}
+    onSubmit={handleUpdate}
+  />
+)}
     </div>
   );
 }
