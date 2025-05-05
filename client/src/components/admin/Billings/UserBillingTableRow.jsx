@@ -10,8 +10,8 @@ const UserBillingTableRow = ({user}) => {
          <td className="px-4 py-2">{user.amount}</td>
          <td className="px-4 py-2">{user.payment_status}</td>
          <td className="px-4 py-2">{user.pakage_type}</td>
-         <td className="px-4 py-2">{moment.utc(user.package_start_date).local().format('YYYY-MM-DD HH:mm:ss')}</td>
-         <td className="px-4 py-2">{moment.utc(user.package_end_date).local().format('YYYY-MM-DD HH:mm:ss')}</td>
+         <td className="px-4 py-2">{moment.parseZone(user.package_start_date).format('YYYY-MM-DD HH:mm:ss')}</td>
+         <td className="px-4 py-2">{moment.parseZone(user.package_end_date).format('YYYY-MM-DD HH:mm:ss')}</td>
          <td className="px-4 py-2">{user.usage_limit}</td>
          <td className="px-4 py-2">{user.status}</td>
 

@@ -80,15 +80,40 @@ const getBillingByMinutes = async (req, res) => {
 // Update billing record
 const updateBilling = async (req, res) => {
   try {
-    const billing = await Billing.findByPk(req.params.id);
+    const userId = req.user.id;
+
+    const billing = await Billing.findOne({ where: { user_id: userId } });
     if (!billing) return res.status(404).json({ message: "Billing not found" });
 
-    await billing.update(req.body);
+    const { pakage_type } = req.body;
+
+    let usage_limit;
+    switch (pakage_type) {
+      case "basic":
+        usage_limit = 10000;
+        break;
+      case "standard":
+        usage_limit = 30000;
+        break;
+      case "premium":
+        usage_limit = 99999;
+        break;
+      default:
+        usage_limit = billing.usage_limit;
+    }
+
+    await billing.update({
+      pakage_type,
+      usage_limit,
+    });
+
     res.status(200).json({ message: "Billing updated", billing });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 // Delete billing record
 const deleteBilling = async (req, res) => {

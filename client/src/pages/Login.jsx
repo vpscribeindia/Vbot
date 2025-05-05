@@ -38,13 +38,20 @@ const handleSubmit= async (e)=>{
 
   
       try {
-        await axios.post(`${API_MAIN_URL}/auth/login`, {
+        const response = await axios.post(`${API_MAIN_URL}/auth/login`, {
         email,
         password,
       }); 
   
-        toast.success("Login successful!");
+      const userRole = response.data.role;  
+
+      if (userRole === "admin") {
+        toast.success("Login successfully!");
+        navigate("/admin");
+      } else {
+        toast.success("Login successfully!");
         navigate("/dashboard");
+      }
       } catch (err) {
         toast.error("Invalid email or password.");
       }
@@ -274,7 +281,7 @@ const handleSubmit= async (e)=>{
             >
               Sign up
             </Button>
-
+{/* 
             <Button
               size="small"
               variant="contained"
@@ -282,7 +289,7 @@ const handleSubmit= async (e)=>{
               onClick={() => navigate('/admin')}
             >
               Admin
-            </Button>
+            </Button> */}
           </Box>
 
           {/* Privacy Policy */}

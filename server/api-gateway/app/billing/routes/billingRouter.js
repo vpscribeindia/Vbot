@@ -16,7 +16,7 @@ const router = express.Router();
 router.post("/createBilling", createBilling);
 router.get("/getAllBillings", getAllBilling);
 router.get("/getBillingById",authenticate, getBillingById);
-router.put("/updateBilling:id", updateBilling);
+router.put("/updateBilling",authenticate, updateBilling);
 router.delete("/deleteBilling:id", deleteBilling);
 router.get("/getBillingByMinutes", authenticate,getBillingByMinutes);
 router.get("/getUserBilling", authenticate,getUserBilling);

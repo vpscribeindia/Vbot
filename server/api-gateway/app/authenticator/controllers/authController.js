@@ -163,7 +163,7 @@ expiresIn: '24h',
           secure: process.env.NODE_ENV === 'production', // set true if https
           sameSite: 'strict',
           maxAge: 3600000, // 1 hour
-      }).json({ message: 'Login successful' });
+      }).json({ message: 'Login successful',role:user.role });
       // res.status(200).json({ message: "Login successful", token });
   } catch (error) {
       console.error("Login Error:", error);
@@ -180,7 +180,7 @@ const protectedUser = async (req, res) => {
     }
 
     const user = await User.findByPk(userId, {
-      attributes: ['status'] 
+      attributes: ['status','role'] 
     });
 
     if (!user) {
@@ -198,14 +198,15 @@ const protectedUser = async (req, res) => {
 };
 
 // Logout
-const logout = (req, res) => {
+const logout =  (req, res) => {
+
   res.clearCookie('accessToken', {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
   });
 
-  return res.status(200).json({ message: 'Logged out successfully' });
+  return res.status(200).json({ message: 'Logged out successfully'});
 };
 
 module.exports = { googleAuth, googleCallback, signup,login, protectedUser, logout };

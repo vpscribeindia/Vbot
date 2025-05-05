@@ -35,7 +35,16 @@ function App() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/admin" element={<Admin />} />
+        {/* <Route path="/admin" element={<Admin />} /> */}
+
+        <Route
+    path="/admin"
+    element={
+      <ProtectedRoute allowedStatus="active">
+        <Admin />
+      </ProtectedRoute>
+    }
+  />    
           <Route
     path="/dashboard"
     element={

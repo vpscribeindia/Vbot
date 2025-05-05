@@ -151,29 +151,49 @@ export const AddUserModal = ({
           onChange={onChangeEmail}
           required
         />
-        <input
-          type="text"
-          placeholder="Specialty"
-          className="w-full p-2 border rounded"
-          value={specialty}
-          onChange={onChangeSpecialty}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Role"
-          className="w-full p-2 border rounded"
-          value={role}
-          onChange={onChangeRole}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Praction"
-          className="w-full p-2 border rounded"
-          value={praction}
-          onChange={onChangePraction}
-        />
+<select
+  className="w-full p-2 border rounded"
+  value={specialty}
+  onChange={onChangeSpecialty}
+  required
+>
+  <option value="">Select Specialty</option>
+  <option value="Cardiology">Cardiology</option>
+  <option value="Neurology">Neurology</option>
+  <option value="Orthopedics">Orthopedics</option>
+  <option value="Dermatology">Dermatology</option>
+  <option value="Pediatrics">Pediatrics</option>
+</select>
+
+<select
+  className="w-full p-2 border rounded"
+  value={role}
+  onChange={onChangeRole}
+  required
+>
+
+<option value="">Select Role</option>
+  <option value="Physician">Physician</option>
+  <option value="Nurse Practitioner">Nurse Practitioner</option>
+  <option value="Physician Assistant">Physician Assistant</option>
+  <option value="Resident">Resident</option>
+  <option value="Medical Student">Medical Student</option>
+</select>
+
+<select
+  className="w-full p-2 border rounded"
+  value={praction}
+  onChange={onChangePraction}
+  required
+>
+<option value="">Select Clinicians work in practice </option>
+  <option value="1-5">1-5</option>
+  <option value="6-10">6-10</option>
+  <option value="11-20">11-20</option>
+  <option value="21-50">21-50</option>
+  <option value="50+">50+</option>
+</select>
+
         <div className="flex justify-center gap-4 mt-4">
           <button
             type="button"
@@ -229,29 +249,46 @@ export const EditUserModal = ({
           onChange={onChangeEmail}
           required
         />
-        <input
-          type="text"
-          placeholder="Specialty"
-          className="w-full p-2 border rounded"
-          value={uspecialty}
-          onChange={onChangeSpecialty}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Role"
-          className="w-full p-2 border rounded"
-          value={urole}
-          onChange={onChangeRole}
-          required
-        />
-        <input
-          type="text"
-          placeholder="Praction"
-          className="w-full p-2 border rounded"
-          value={upraction}
-          onChange={onChangePraction}
-        />
+<select
+  className="w-full p-2 border rounded"
+  value={uspecialty}
+  onChange={onChangeSpecialty}
+  required
+>
+  <option value="">Select Specialty</option>
+  <option value="Cardiology">Cardiology</option>
+  <option value="Neurology">Neurology</option>
+  <option value="Orthopedics">Orthopedics</option>
+  <option value="Dermatology">Dermatology</option>
+  <option value="Pediatrics">Pediatrics</option>
+</select>
+<select
+  className="w-full p-2 border rounded"
+  value={urole}
+  onChange={onChangeRole}
+  required
+>
+
+<option value="">Select Role</option>
+  <option value="Physician">Physician</option>
+  <option value="Nurse Practitioner">Nurse Practitioner</option>
+  <option value="Physician Assistant">Physician Assistant</option>
+  <option value="Resident">Resident</option>
+  <option value="Medical Student">Medical Student</option>
+</select>
+<select
+  className="w-full p-2 border rounded"
+  value={upraction}
+  onChange={onChangePraction}
+  required
+>
+<option value="">Select Clinicians work in practice </option>
+  <option value="1-5">1-5</option>
+  <option value="6-10">6-10</option>
+  <option value="11-20">11-20</option>
+  <option value="21-50">21-50</option>
+  <option value="50+">50+</option>
+</select>
         <div className="flex justify-center gap-4 mt-4">
           <button
             type="button"

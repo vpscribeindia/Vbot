@@ -17,9 +17,11 @@ const Header = ({variant}) => {
       : "bg-white dark:bg-gray-500";
 
   const handleLogout = async () => {
-    await axios.get(`${API_MAIN_URL}/auth/logout`,{
+ await axios.get(`${API_MAIN_URL}/auth/logout`,{
       withCredentials: true
     });
+    console.log('logout');
+    
     toast.error('Logged out Successfully!');
     navigate('/login');
   };

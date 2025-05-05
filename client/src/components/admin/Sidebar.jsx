@@ -9,6 +9,9 @@ import {
 const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
   const [userMgmtOpen, setUserMgmtOpen] = useState(false);
 
+  const isUserMgmtActive =
+    activeView === "users" || activeView === "usersbilling";
+
   const handleUserMenuClick = () => {
     setUserMgmtOpen(!userMgmtOpen);
   };
@@ -37,7 +40,11 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
         <li className="group relative">
           <button
             onClick={handleUserMenuClick}
-            className="w-full flex items-center justify-between p-2 rounded hover:bg-gray-700 transition"
+            className={`w-full flex items-center justify-between p-2 rounded transition relative ${
+              isUserMgmtActive
+                ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
+                : "hover:bg-gray-700"
+            }`}
           >
             <div className="flex items-center space-x-3">
               <FaUsers />
@@ -52,9 +59,11 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
             )}
           </button>
 
-          {/* Hover tooltip + submenu for collapsed view */}
+          {/* Flyout menu for collapsed sidebar */}
           {!isOpen && (
-            <div className="absolute left-full top-0 ml-2 z-50 w-40 bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 transition duration-200">
+            <div
+              className="absolute left-full top-0 ml-2 z-50 w-40 bg-gray-800 rounded shadow-lg opacity-0 group-hover:opacity-100 hover:opacity-100 pointer-events-none group-hover:pointer-events-auto hover:pointer-events-auto transition duration-200 before:absolute before:top-0 before:-left-2 before:w-2 before:h-full"
+            >
               <div className="text-xs font-semibold text-white px-3 py-2 border-b border-gray-600">
                 User Management
               </div>
@@ -119,7 +128,7 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
         </li>
 
         {/* Logging and Monitoring */}
-        <li>
+        <li className="relative group">
           <button
             onClick={() => setView("userslogging")}
             className={`w-full flex items-center space-x-3 p-2 rounded hover:bg-gray-700 transition ${
@@ -131,6 +140,13 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
             <FaChartLine />
             {isOpen && <span>Logging & Monitoring</span>}
           </button>
+
+          {/* Tooltip when collapsed */}
+          {!isOpen && (
+            <div className="absolute left-full top-0 ml-2 z-50 w-max bg-gray-800 text-white text-sm rounded shadow-lg px-2 py-1 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto hover:opacity-100 hover:pointer-events-auto transition duration-200">
+              Logging & Monitoring
+            </div>
+          )}
         </li>
       </ul>
     </aside>
