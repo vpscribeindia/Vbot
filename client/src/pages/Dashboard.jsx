@@ -177,7 +177,7 @@ const Dashboard = () => {
       );
       const minutes =convertTime(response1.data.usage_limit);
       
-      setremainingMinutes(minutes);
+      setremainingMinutes(parseInt(response1.data.usage_limit) === 99999 ? "unlimited" : convertTime(response1.data.usage_limit));
       const convertedMinutes = extractMinutes(minutes);
         
   
@@ -363,8 +363,7 @@ catch(error){
       
 
       setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
-      const minutes = convertTime(data.usage_limit);
-      setremainingMinutes(minutes);
+      setremainingMinutes(parseInt(data.usage_limit) === 99999 ? "unlimited" : convertTime(data.usage_limit));
       setUploadStatus("Upload successful!");
       setSelectedFiles([]);
       setPatientName("");
@@ -461,8 +460,7 @@ catch(error){
         const { data } = await axios.post(API_URL, formData,{
           withCredentials: true,
         });
-        const minutes = convertTime(data.usage_limit);
-        setremainingMinutes(minutes);
+        setremainingMinutes(parseInt(data.usage_limit) === 99999 ? "unlimited" : convertTime(data.usage_limit));
         setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
 
       } catch (error) {

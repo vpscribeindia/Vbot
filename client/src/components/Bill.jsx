@@ -18,22 +18,22 @@ const plans = [
   {
     name: "trial",
     price: "$0/mo",
-    // features: ["1 User", "1GB Storage", "Community Support"],
+    features: ["Usage Limit - 60 Minutes"],
   },
   {
     name: "basic",
     price: "$9/mo",
-    // features: ["5 Users", "10GB Storage", "Email Support"],
+    features: ["Usage Limit - 170 Minutes"],
   },
   {
     name: "standard",
     price: "$19/mo",
-    // features: ["10 Users", "100GB Storage", "Priority Support"],
+    features: ["Usage Limit - 500 Minutes"],
   },
   {
     name: "premium",
     price: "$49/mo",
-    // features: ["Unlimited Users", "1TB Storage", "24/7 Phone Support"],
+    features: ["Usage Limit - Unlimited"],
   },
 ];
 
@@ -116,7 +116,9 @@ const BillingPopup = () => {
 
         <DialogContent>
           <Grid container spacing={2} justifyContent="center">
-            {plans.map((plan) => {
+          {plans
+            .filter((plan) => currentPlan !== "trial" ? plan.name !== "trial" : true)
+              .map((plan) => {
               const isCurrentPlan = plan.name === currentPlan;
 
               return (
@@ -158,11 +160,11 @@ const BillingPopup = () => {
                       </Typography>
 
                       {/* Uncomment below to show features */}
-                      {/* {plan.features.map((feature, index) => (
+                      {plan.features.map((feature, index) => (
                         <Typography key={index} variant="body2" sx={{ my: 0.5 }}>
                           • {feature}
                         </Typography>
-                      ))} */}
+                      ))}
 
                       <Button
                         variant="contained"

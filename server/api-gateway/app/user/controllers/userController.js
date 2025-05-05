@@ -26,7 +26,7 @@ const getUserById = async (req, res) => {
         const userId =req.user.id;
   const user = await Userinfo.findOne({
   where: { user_id: userId },
-  attributes: ['display_name'],
+  attributes: ['display_name','specialty','role','praction'],
   include: [{
     model: User,
     attributes: ['email','role']}]
@@ -63,12 +63,13 @@ const updatePassword = async (req, res) => {
 const updateUser = async (req, res) => {
     
     try {
-        const { id, display_name, email,specialty,role,praction } = req.body;
-        const updateUser = await Userinfo.update(
+        const user_id=req.user.id;
+        const {display_name, email,specialty,role,praction } = req.body;
+        await Userinfo.update(
             {display_name:display_name,specialty:specialty,role:role,praction:praction},
-            { where: { user_id: id } }
+            { where: { user_id: user_id } }
         )
-        const userInfo = await Userinfo.findOne({ where: { user_id: id } });
+        const userInfo = await Userinfo.findOne({ where: { user_id: user_id } });
         if (userInfo && userInfo.user_id) {
             await User.update(
               { email: email },
