@@ -114,7 +114,7 @@ if (!validatePassword(password)) {
         return;
       }
  await axios.put(`http://localhost:3000/api/updatepassword`,
-  {password:password },
+  {id:passwordModal,password:password },
         { withCredentials: true}
 );
 toast.success("Successfully Updated")

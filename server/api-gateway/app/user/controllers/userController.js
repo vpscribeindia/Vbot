@@ -45,12 +45,12 @@ const getUserById = async (req, res) => {
 const updatePassword = async (req, res) => {
 
     try{
-        const user_id=req.user.id;
-      const {password } = req.body;  
+        // const user_id=req.user.id;
+      const {id,password } = req.body;  
       const hashedPassword = await bcrypt.hash(password, 10);
       const updated = await User.update(
         { password:hashedPassword },
-        { where: { id: user_id } }
+        { where: { id: id } }
       );
   
       
