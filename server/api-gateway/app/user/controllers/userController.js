@@ -149,6 +149,11 @@ const updateUser = async (req, res) => {
 const addUsers  = async (req,res)=>{
     try{
 const {name,specialty,role,praction,email} = req.body;
+const existingUser = await User.findOne({ where: { email } });
+
+if (existingUser) {
+  return res.status(400).json({ emailerror: "Email already exists" });
+}
  const newUser = await User.create({ email:email,status:'active' });
 await Userinfo.create({
     user_id: newUser.id,          
@@ -158,12 +163,12 @@ await Userinfo.create({
     praction:praction
   });
 
-  const startMoment = moment().local();
-const endMoment = startMoment.clone().add(7, 'days');
 
-  const package_start = startMoment.format('YYYY-MM-DD HH:mm:ss');
-  const package_end =endMoment.format('YYYY-MM-DD HH:mm:ss');
-
+  const {date} = req.body;
+  const startMoment = moment.utc(date);
+  const startDate = startMoment.local().format('YYYY-MM-DD HH:mm:ss');
+  const endMoment = startMoment.clone().add(7, 'days');
+  const endDate = endMoment.local().format('YYYY-MM-DD HH:mm:ss');
           const billing = await Billing.create({
               user_id: newUser.id,
               amount: "0",
@@ -172,16 +177,16 @@ const endMoment = startMoment.clone().add(7, 'days');
               pakage_type: "trial",
               usage_limit: "3600",
               pakage_discription: "free trial",
-              package_start_date: package_start,
-              package_end_date: package_end
+              package_start_date: startDate,
+              package_end_date: endDate
           });
   
 res.status(200).json({
     message: "User added successfully",data:{billing}
   });
     }
-    catch{
-        res.status(500).json({ message: "Server error" });
+    catch(error){
+        res.status(500).json({ message: "Server error",error:error.message });
     }
 }
 

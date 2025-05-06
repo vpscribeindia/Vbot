@@ -111,9 +111,8 @@ const UserBilling = () => {
               setuAmount(billingusers.amount);
               setuPaymentStatus(billingusers.payment_status);
               setuPackageType(billingusers.pakage_type);
-
-              setuPackageStart(moment.parseZone(billingusers.package_start_date).format('YYYY-MM-DD HH:mm:ss'));
-              setuPackageEnd(moment.parseZone(billingusers.package_end_date).format('YYYY-MM-DD HH:mm:ss'));
+              setuPackageStart(billingusers.package_start_date.slice(0, 16).replace(' ', 'T'));
+              setuPackageEnd(billingusers.package_end_date.slice(0, 16).replace(' ', 'T'));              
               setuLimit(billingusers.usage_limit);
               setuStatus(billingusers.status);
               setEditModal(billingusers.user_id);  
@@ -133,8 +132,8 @@ const UserBilling = () => {
     uamount={uamount}
     upstatus={upstatus}
     uptype={uptype}
-    upsdate={moment.utc(upsdate).local().format('YYYY-MM-DD HH:mm:ss')}
-    upedate={moment.utc(upedate).local().format('YYYY-MM-DD HH:mm:ss')}
+    upsdate={upsdate}
+    upedate={upedate}
     ulimit={ulimit}
     ustatus={ustatus}
     onChangeName={(e) => setuName(e.target.value)}

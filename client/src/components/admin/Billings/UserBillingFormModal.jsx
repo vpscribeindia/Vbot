@@ -17,7 +17,6 @@ import React from 'react'
     onChangePackageType,
     onChangePackageStart,
     onChangePackageEnd,
-    onChangeLimit,
     onChangeStatus,
     onCancel,
     onSubmit
@@ -66,10 +65,9 @@ import React from 'react'
   className="w-full p-2 border rounded"
   value={uptype}
   onChange={onChangePackageType}
-  required
+
 >
   <option value="">Select Package Type</option>
-  <option value="trial">Trial</option>
   <option value="basic">Basic</option>
   <option value="standard">Standard</option>
   <option value="premium">Premium</option>
@@ -90,6 +88,7 @@ import React from 'react'
             value={upedate}
             onChange={onChangePackageEnd}
             required
+            
           />
                     <input
             type="number"

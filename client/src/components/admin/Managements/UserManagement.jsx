@@ -5,6 +5,7 @@ import UserTable from "./UserTable";
 import {AddUserModal,EditUserModal,PasswordModal,DeleteModal}  from "./UserFormModal";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
+import moment from 'moment';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -145,8 +146,9 @@ catch{
   const handleAdd = async(e)=>{
 e.preventDefault()
 try{
+  const date = moment().format('YYYY-MM-DD HH:mm:ss');
   await axios.post(`http://localhost:3000/api/addUsers`,
-{name,specialty,role,praction,email},
+{name,specialty,role,praction,email,date},
 { withCredentials: true})
 fetchUsers();
 toast.success("User Added Successfully")
@@ -157,8 +159,14 @@ setSpecialty('')
 setPraction('')
 
 setAddModal(null)
-}catch{
-  toast.error("Failed to add")
+}
+  catch(error){  
+  
+    if (error.response && error.response.status === 400) {
+    toast.error(error.response.data.emailerror);
+  }else{
+    toast.error("Failed to add")
+  }
 }
   }
   return (
