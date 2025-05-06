@@ -108,9 +108,11 @@ const Header = ({ variant }) => {
 
   const handleSave = async () => {
     try {
-      await axios.put("http://localhost:3000/api/updateUsers", editUser, {
+      await axios.put("http://localhost:3000/api/updateProfileUsers", editUser, {
         withCredentials: true,
       });
+      console.log(editUser);
+      
       toast.success("Profile updated successfully!");
       fetchUsers();
       setOpenDialog(false);

@@ -56,11 +56,11 @@ const UserManagement = () => {
   }, []);
 
   const handleDelete = async() => {
-   await axios
-      .delete(`http://localhost:3000/api/deleteUsers`,{ withCredentials: true}
-    )
+    await axios.delete(`http://localhost:3000/api/deleteUsers/${deleteUserId}`, {
+      withCredentials: true
+    })    
+    .then(() => {
 
-      .then(() => {
         fetchUsers();
         toast.error("User Deleted");
       })
@@ -130,9 +130,10 @@ catch{
 e.preventDefault()
 try{
  await axios.put(`http://localhost:3000/api/updateUsers`,
-  {display_name:uname,email:uemail,specialty:uspecialty,role:urole,praction:upraction },
+  {id:editModal,display_name:uname,email:uemail,specialty:uspecialty,role:urole,praction:upraction },
   { withCredentials: true}
 );
+
 fetchUsers();
 toast.success("User Updated Successfully")
 setEditModal(null)
@@ -164,7 +165,7 @@ setAddModal(null)
     <div className="p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-gray-800">User Management</h2>
+        <h2 className="text-3xl font-bold text-gray-800">User Info</h2>
 
         <div className="flex items-center gap-4">
 

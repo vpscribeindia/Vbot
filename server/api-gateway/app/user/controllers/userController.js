@@ -3,6 +3,7 @@ const { User, Userinfo,Billing } = require("../../../config/db");
 
 const bcrypt = require('bcrypt');
 
+const moment = require('moment');
 
 
 const getUsers = async (req, res) => {
@@ -64,13 +65,12 @@ const updatePassword = async (req, res) => {
 const updateUser = async (req, res) => {
     
     try {
-        const user_id=req.user.id;
-        const {display_name, email,specialty,role,praction } = req.body;
+        const {id,display_name, email,specialty,role,praction } = req.body;
         await Userinfo.update(
             {display_name:display_name,specialty:specialty,role:role,praction:praction},
-            { where: { user_id: user_id } }
+            { where: { user_id: id } }
         )
-        const userInfo = await Userinfo.findOne({ where: { user_id: user_id } });
+        const userInfo = await Userinfo.findOne({ where: { user_id: id } });
         if (userInfo && userInfo.user_id) {
             await User.update(
               { email: email },
@@ -104,10 +104,52 @@ const updateUser = async (req, res) => {
     }
   };
   
+  const updateProfileUser = async (req, res) => {
+    
+    try {
+        const userId = req.user.id;
+        const {name, email,specialty,role,praction } = req.body;
+        await Userinfo.update(
+            {display_name:name,specialty:specialty,role:role,praction:praction},
+            { where: { user_id: userId } }
+        )
+        const userInfo = await Userinfo.findOne({ where: { user_id: userId } });
+        if (userInfo && userInfo.user_id) {
+            await User.update(
+              { email: email },
+              { where: { id: userInfo.user_id } }
+            );
+          }
+    //   const user = await User.findByPk(id);
+    //   if (!user) {
+    //     return res.status(404).json({ message: "User not found" });
+    //   }
+  
+    //   // ✅ update User email
+    //   if (email) user.email = email;
+  
+    //   // ✅ update Userinfo display_name
+    //   const userinfo = await user.getUserinfo();
+    //   if (userinfo && display_name) {
+    //     userinfo.display_name = display_name;
+    //     await userinfo.save();
+    //   }
+  
+    //   await user.save();
+  
+      res.status(200).json({
+        message: "User Profile updated successfully"
+      });
+      
+    } catch (error) {
+      console.error("Update Error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  };
 const addUsers  = async (req,res)=>{
     try{
 const {name,specialty,role,praction,email} = req.body;
- const newUser = await User.create({ email:email });
+ const newUser = await User.create({ email:email,status:'active' });
 await Userinfo.create({
     user_id: newUser.id,          
     display_name:name,
@@ -115,8 +157,27 @@ await Userinfo.create({
     role:role,
     praction:praction
   });
+
+  const startMoment = moment().local();
+const endMoment = startMoment.clone().add(7, 'days');
+
+  const package_start = startMoment.format('YYYY-MM-DD HH:mm:ss');
+  const package_end =endMoment.format('YYYY-MM-DD HH:mm:ss');
+
+          const billing = await Billing.create({
+              user_id: newUser.id,
+              amount: "0",
+              status: "active",
+              payment_status: "paid",
+              pakage_type: "trial",
+              usage_limit: "3600",
+              pakage_discription: "free trial",
+              package_start_date: package_start,
+              package_end_date: package_end
+          });
+  
 res.status(200).json({
-    message: "User added successfully"
+    message: "User added successfully",data:{billing}
   });
     }
     catch{
@@ -126,8 +187,8 @@ res.status(200).json({
 
 const deleteUser = async (req, res) => {
     try {
-        const userId = req.user.id; 
-      const user = await User.findByPk(userId);
+        const {id} =req.params; 
+      const user = await User.findByPk(id);
       if (!user) return res.status(404).json({ message: "User not found" });
   
       await user.destroy();
@@ -237,4 +298,4 @@ const updateAdminUser = async (req, res) => {
 };
 
 
-module.exports = { getUsers,getUserById, updateUser, deleteUser,getAdminAllUsers ,updateAdminUser,updatePassword,addUsers };
+module.exports = { getUsers,getUserById, updateUser, deleteUser,getAdminAllUsers ,updateAdminUser,updatePassword,addUsers,updateProfileUser };

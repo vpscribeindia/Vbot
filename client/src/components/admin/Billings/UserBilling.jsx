@@ -20,6 +20,28 @@ const UserBilling = () => {
   const [upedate, setuPackageEnd] = useState('');
   const [ulimit, setuLimit] = useState('');
   const [ustatus, setuStatus] = useState('');
+  
+  const onChangePackageType = (e) => {
+    const selectedType = e.target.value;
+    setuPackageType(selectedType);
+
+    let limit = '';
+    switch (selectedType) {
+      case 'basic':
+        limit = 10200;
+        break;
+      case 'standard':
+        limit = 30000;
+        break;
+      case 'premium':
+        limit = 99999;
+        break;
+      default:
+        limit = 0;
+    }
+
+    setuLimit(limit);
+  };
 
 
   const fetchBillingUsers = () => {
@@ -50,9 +72,10 @@ const UserBilling = () => {
     e.preventDefault()
     try{
      await axios.put(`http://localhost:3000/api/updateUserBilling`,
-      {amount:uamount,payment_status:upstatus,status:ustatus,package_type:uptype,package_end_date:upedate,package_start_date:upsdate,usage_limit:ulimit,email:uemail,display_name:uname },
+      {id:editModal,amount:uamount,payment_status:upstatus,status:ustatus,package_type:uptype,package_end_date:upedate,package_start_date:upsdate,usage_limit:ulimit,email:uemail,display_name:uname },
       { withCredentials: true}
     );
+    
     fetchBillingUsers();
     toast.success("Billing User Updated Successfully")
     setEditModal(null)
@@ -93,7 +116,7 @@ const UserBilling = () => {
               setuPackageEnd(moment.parseZone(billingusers.package_end_date).format('YYYY-MM-DD HH:mm:ss'));
               setuLimit(billingusers.usage_limit);
               setuStatus(billingusers.status);
-              setEditModal(billingusers.id);  
+              setEditModal(billingusers.user_id);  
             }}
           />
         </div>
@@ -110,15 +133,15 @@ const UserBilling = () => {
     uamount={uamount}
     upstatus={upstatus}
     uptype={uptype}
-    upsdate={upsdate}
-    upedate={upedate}
+    upsdate={moment.utc(upsdate).local().format('YYYY-MM-DD HH:mm:ss')}
+    upedate={moment.utc(upedate).local().format('YYYY-MM-DD HH:mm:ss')}
     ulimit={ulimit}
     ustatus={ustatus}
     onChangeName={(e) => setuName(e.target.value)}
     onChangeEmail={(e) => setuEmail(e.target.value)}
     onChangeAmount={(e) => setuAmount(e.target.value)}
     onChangePaymentStatus={(e) => setuPaymentStatus(e.target.value)}
-    onChangePackageType={(e) => setuPackageType(e.target.value)}
+    onChangePackageType={onChangePackageType}
     onChangePackageStart={(e) => setuPackageStart(e.target.value)}
     onChangePackageEnd={(e) => setuPackageEnd(e.target.value)}
     onChangeLimit={(e) => setuLimit(e.target.value)}

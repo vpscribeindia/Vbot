@@ -157,20 +157,20 @@ const getUserBilling = async (req, res) => {
 const updateUserBilling = async (req, res) => {
     
   try {
-    const userID = req.user.id;
-      const {amount, payment_status,package_type,package_start_date,package_end_date,usage_limit,status,email,display_name } = req.body;
+
+      const {id,amount, payment_status,package_type,package_start_date,package_end_date,usage_limit,status,email,display_name } = req.body;
       const updateUser = await Billing.update(
           {amount:amount,payment_status:payment_status,status:status,pakage_type:package_type,package_end_date:package_end_date,package_start_date:package_start_date,usage_limit:usage_limit},
-          { where: { user_id: userID } }
+          { where: { user_id: id } }
       )
-      const userInfo = await Billing.findOne({ where: { user_id: userID } });
+      const userInfo = await Billing.findOne({ where: { user_id: id } });
       if (userInfo && userInfo.user_id) {
         await Userinfo.update(
           { display_name: display_name },
           { where: { user_id: userInfo.user_id } }
         );
       }
-          const user = await Billing.findOne({ where: { user_id: userID } });
+          const user = await Billing.findOne({ where: { user_id: id } });
       if (user && user.user_id) {
           await User.update(
             { email: email },

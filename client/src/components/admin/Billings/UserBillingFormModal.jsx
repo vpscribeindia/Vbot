@@ -96,7 +96,7 @@ import React from 'react'
             placeholder="Usage Limit"
             className="w-full p-2 border rounded"
             value={ulimit}
-            onChange={onChangeLimit}
+            readOnly
             required
           />
 <select

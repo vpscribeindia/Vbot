@@ -29,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
             <span className="text-blue-400">Admin</span> Panel
           </span>
         )}
-        <button onClick={toggleSidebar} className="text-white ml-2">
+        <button onClick={toggleSidebar} className="text-white ml-2 cursor-pointer">
           <FaBars />
         </button>
       </div>
@@ -40,7 +40,7 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
         <li className="group relative">
           <button
             onClick={handleUserMenuClick}
-            className={`w-full flex items-center justify-between p-2 rounded transition relative ${
+            className={`w-full flex items-center justify-between p-2 rounded transition relative cursor-pointer ${
               isUserMgmtActive
                 ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                 : "hover:bg-gray-700"
@@ -71,19 +71,19 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
                 <li>
                   <button
                     onClick={() => setView("users")}
-                    className={`block p-2 rounded w-full text-left transition-all ${
+                    className={`block p-2 rounded w-full text-left transition-all cursor-pointer ${
                       activeView === "users"
                         ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                         : "hover:bg-gray-700 text-gray-300"
                     }`}
                   >
-                    Users
+                    User Info
                   </button>
                 </li>
                 <li>
                   <button
                     onClick={() => setView("usersbilling")}
-                    className={`block p-2 rounded w-full text-left transition-all ${
+                    className={`block p-2 rounded w-full text-left transition-all cursor-pointer ${
                       activeView === "usersbilling"
                         ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                         : "hover:bg-gray-700 text-gray-300"
@@ -102,19 +102,19 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
               <li>
                 <button
                   onClick={() => setView("users")}
-                  className={`block p-2 rounded w-full text-left transition-all ${
+                  className={`block p-2 rounded w-full text-left transition-all cursor-pointer ${
                     activeView === "users"
                       ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                       : "hover:bg-gray-700 text-gray-300"
                   }`}
                 >
-                  Users
+                    User Info
                 </button>
               </li>
               <li>
                 <button
                   onClick={() => setView("usersbilling")}
-                  className={`block p-2 rounded w-full text-left transition-all ${
+                  className={`block p-2 rounded w-full text-left transition-all cursor-pointer ${
                     activeView === "usersbilling"
                       ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                       : "hover:bg-gray-700 text-gray-300"
@@ -131,7 +131,7 @@ const Sidebar = ({ isOpen, toggleSidebar, setView, activeView }) => {
         <li className="relative group">
           <button
             onClick={() => setView("userslogging")}
-            className={`w-full flex items-center space-x-3 p-2 rounded hover:bg-gray-700 transition ${
+            className={`w-full flex items-center space-x-3 p-2 rounded hover:bg-gray-700 transition cursor-pointer ${
               activeView === "userslogging"
                 ? "bg-blue-600 text-white border-l-4 border-blue-400 pl-3"
                 : "text-gray-300"
