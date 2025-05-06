@@ -395,6 +395,11 @@ catch(error){
   };
 
   const handleStartRecording = async () => {
+    if (!PatientName.trim()) {
+      toast.error('Patient name is required');
+      return;
+    }
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -596,7 +601,7 @@ const uniqueSections = parsedTranscript
         {/* Job Status Section */}
         <div className="lg:w-96 w-full p-4 max-h-screen overflow-y-auto bg-white shadow-lg rounded-lg">
       {/* Header */}
-      <div>Remaining Minutes : {(remainingMinutes) ? remainingMinutes : '0'}</div>
+      <div>Remaining Time : {(remainingMinutes) ? remainingMinutes : '0'}</div>
       <Box sx={{ typography: "h6",gutterBottom:true }}  className=" sticky top-0 bg-white py-5 z-50">
         Queued Files
       </Box>
@@ -763,6 +768,7 @@ const uniqueSections = parsedTranscript
                 <Button variant="contained" color="primary" onClick={handleUpload} className="w-full mx-2">Upload</Button>
                 <Button
                   variant="contained"
+                  value={PatientName}
                   color={recording ? "secondary" : "primary"}
                   onClick={recording ? handleStopRecording : handleStartRecording}
                   className="w-full mx-2"
