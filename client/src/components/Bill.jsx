@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from "react-toastify";
 import {
   Box,
   Button,
@@ -79,10 +80,10 @@ const BillingPopup = () => {
       setCurrentPlan(selectedPlan.name);
       setPaymentOpen(false);
       setOpen(false);
-      alert(`Payment successful! Subscribed to ${selectedPlan.name} plan.`);
+      toast.success(`Payment successful! Subscribed to ${selectedPlan.name} plan.`);
     } catch (error) {
       console.error("Payment update failed:", error);
-      alert("Payment failed. Please try again.");
+      toast.error("Payment failed. Please try again.");
     }
   };  
 
