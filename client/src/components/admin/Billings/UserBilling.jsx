@@ -85,7 +85,7 @@ const UserBilling = () => {
     }
       }
   return (
-    <div className="p-4">
+    <div className="p-1">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold text-gray-800">User Billings</h2>

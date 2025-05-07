@@ -181,7 +181,7 @@ const Header = ({ variant }) => {
         <ul className="py-2">
           <li>
             <a
-              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white"
+              className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
               onClick={handleLogout}
             >
               Sign out

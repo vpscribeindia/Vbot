@@ -197,7 +197,7 @@ setAddModal(null)
       ) : users.length === 0 ? (
         <p className="text-gray-500 italic">No users found.</p>
       ) : (
-        <div className="bg-white rounded-xl shadow-md p-4">
+        <div className="bg-white shadow-md p-4">
           <UserTable
             users={users}
             onEdit={(user) => {

@@ -6,10 +6,11 @@ const Userinfo = require('./models/userInfo');
 const Billing = require('./models/billing');
 const Template = require('./models/template');
 const EmailStatus = require('./models/emailstatus');
+const Logging_Monitoring = require('./models/logging');
 
 const { Op } = require('sequelize');
 
-const db = { sequelize, Op, File, Transcript, User, Userinfo, Billing, Template, EmailStatus };
+const db = { sequelize, Op, File, Transcript, User, Userinfo, Billing, Template, EmailStatus,Logging_Monitoring };
 
 async function initializeDatabase() {
   try {
@@ -30,7 +31,10 @@ async function initializeDatabase() {
 
     User.hasOne(EmailStatus, { foreignKey: 'user_id' });
     EmailStatus.belongsTo(User, { foreignKey: 'user_id' });
-    
+
+    User.hasOne(Logging_Monitoring, { foreignKey: 'user_id' });
+    Logging_Monitoring.belongsTo(User, { foreignKey: 'user_id' });
+
     User.hasOne(Userinfo, { foreignKey: 'user_id', as: 'profile' });
 
     //    await Template.create({

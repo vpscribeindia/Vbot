@@ -180,9 +180,8 @@ const Dashboard = () => {
       setremainingMinutes(parseInt(response1.data.usage_limit) === 99999 ? "unlimited" : convertTime(response1.data.usage_limit));
       const convertedMinutes = extractMinutes(minutes);
         
-  
+  // Checking Email Status
 
-     
   const response2 = await axios.get(`${API_MAIN_URL}/api/getuserid`,{
     withCredentials: true,
   })
@@ -266,6 +265,22 @@ catch(error){
     console.error("Error in status :", error);
   }
 }
+
+// Checking logging and monitoring
+
+try{
+  const formatted = moment().format('YYYY-MM-DD HH:mm:ss');
+  const activity = 'logined';
+
+  await axios.post(`${API_MAIN_URL}/api/createLogging`,{
+    date: formatted,
+    activity: activity},
+    {withCredentials: true,
+  })
+  }catch(error){
+    console.error("Error :", error);
+  }
+
         setJobStatuses(data);
           const list = response.data.templateNames || [];
           setTemplates(list);
@@ -348,6 +363,7 @@ catch(error){
       }
 
 
+
     const formData = new FormData();
     formData.append("audioFiles", selectedFiles[0]);
     formData.append("patientName", PatientName);
@@ -365,6 +381,20 @@ catch(error){
       setJobStatuses((prev) => [{ fileId: data.fileId, status: "Queued" }, ...prev]);
       setremainingMinutes(parseInt(data.usage_limit) === 99999 ? "unlimited" : convertTime(data.usage_limit));
       setUploadStatus("Upload successful!");
+
+      // check logging
+      try {
+        const formatted = moment().format('YYYY-MM-DD HH:mm:ss');
+        const activity = 'transcribed';
+        await axios.post(`${API_MAIN_URL}/api/createLogging`, {
+          date: formatted,
+          activity: activity
+        }, {
+          withCredentials: true
+        });
+      } catch (error) {
+        console.error("Logging error:", error);
+      }
       setSelectedFiles([]);
       setPatientName("");
     } catch (error) {
@@ -416,6 +446,19 @@ catch(error){
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
+          // check logging
+          try {
+            const formatted = moment().format('YYYY-MM-DD HH:mm:ss');
+            const activity = 'recorded';
+            await axios.post(`${API_MAIN_URL}/api/createLogging`, {
+              date: formatted,
+              activity: activity
+            }, {
+              withCredentials: true
+            });
+          } catch (error) {
+            console.error("Logging error:", error);
+          }
   };
 
   const getAccurateDuration = (blob) => {

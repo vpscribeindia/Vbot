@@ -14,13 +14,13 @@ const UserTableRow = ({
   return (
     <tr className="border-t">
 
-      <td className="px-6 py-2">{user.Userinfo.display_name}</td>
-      <td className="px-6 py-2">{user.email}</td>
-      <td className="px-6 py-2">{user.Userinfo.specialty}</td>
-      <td className="px-6 py-2">{user.Userinfo.role}</td>
-      <td className="px-6 py-2">{user.Userinfo.praction}</td>
+      <td className="px-3 py-2">{user.Userinfo.display_name}</td>
+      <td className="px-3 py-2">{user.email}</td>
+      <td className="px-3 py-2">{user.Userinfo.specialty}</td>
+      <td className="px-3 py-2">{user.Userinfo.role}</td>
+      <td className="px-3 py-2">{user.Userinfo.praction}</td>
 
-      <td className="px-4 py-2 space-x-2 text-center">
+      <td className="px-3 py-2 space-x-2 text-center">
         <button onClick={() => handleEdit(user)} className="cursor-pointer">
           <FaEdit className="inline text-yellow-500" />
         </button>
@@ -36,8 +36,15 @@ const UserTableRow = ({
     user.auth_provider === "local" ? "text-indigo-500" : "text-gray-400"
   }`}/>
         </button>
-        <button onClick={() => handleDelete(user.id)} className="cursor-pointer">
-          <FaTrash className="inline text-red-500" />
+        <button onClick={() =>
+          { 
+            if(user.role == "user"){
+          handleDelete(user.id)}}} 
+          disabled={user.role == "admin"}>
+          <FaTrash
+          className={`cursor-pointer inline ${
+            user.role === "user" ? "text-red-500" : "text-red-400"
+          }`}/>
         </button>
       </td>
     </tr>

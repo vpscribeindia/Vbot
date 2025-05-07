@@ -14,11 +14,11 @@ const UserLogging = () => {
   const [error, setError] = useState(null);
   const [deleteUserId, setDeleteUserId] = useState(null);
 
-  const fetchUsers = () => {
+  const fetchLoggingUsers = () => {
     setLoading(true);
     setError(null);
     axios
-      .get("http://localhost:3000/api/users",{
+      .get("http://localhost:3000/api/getLogging",{
         withCredentials: true
       })
       .then((res) => setUsers(res.data))
@@ -30,7 +30,7 @@ const UserLogging = () => {
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchLoggingUsers();
   }, []);
 
   const handleDelete = () => {
