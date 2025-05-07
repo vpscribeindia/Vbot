@@ -19,8 +19,15 @@ import {
 
 const API_MAIN_URL = import.meta.env.VITE_API_URL;
 
-const Header = ({ variant }) => {
+const Header = ({ variant, sidebarOpen }) => {
   const navigate = useNavigate();
+  const leftClass =
+  variant === "user"
+    ? "left-77"
+    : sidebarOpen
+    ? "left-64"
+    : "left-20";
+
   const baseClasses = "shadow";
   const bgClass =
     variant === "admin"
@@ -123,7 +130,7 @@ const Header = ({ variant }) => {
   };
 
   return (
-    <nav className={`${baseClasses} ${bgClass}`}>
+    <nav className={`fixed top-0 ${leftClass} right-0 z-50 ${baseClasses} ${bgClass}`}>
       <div className="flex items-center justify-between px-4 py-3">
         {/* Logo */}
         <div className="flex items-center space-x-3">

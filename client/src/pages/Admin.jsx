@@ -3,8 +3,6 @@ import { useState } from 'react';
 import Header from '../components/admin/Header';
 import Sidebar from '../components/admin/Sidebar';
 import UserManagement from '../components/admin/Managements/UserManagement';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import UserLogging from '../components/admin/Monitoring_Logging/UserLogging';
 import UserBilling from '../components/admin/Billings/UserBilling';
 
@@ -30,9 +28,9 @@ function Admin() {
             sidebarOpen ? "ml-64" : "ml-20"
           }`}
         >
-          <Header variant="admin" />
+          <Header variant="admin" sidebarOpen={sidebarOpen}/>
 
-          <main className="p-6">
+          <main className="p-6 pt-20">
             {view === "users" && <UserManagement />}
             {view === "userslogging" && <UserLogging />}
             {view === "usersbilling" && <UserBilling />}
