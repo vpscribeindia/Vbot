@@ -29,6 +29,7 @@ const UserManagement = () => {
   const [urole, setuRole] = useState('');
   const [uspecialty, setuSpecialty] = useState('');
   const [upraction, setuPraction] = useState('');
+  const API_MAIN_URL = import.meta.env.VITE_API_URL;
 
 
 
@@ -41,7 +42,7 @@ const UserManagement = () => {
     setLoading(true);
     setError(null);
     axios
-      .get("http://localhost:3000/api/users",{
+      .get(`${API_MAIN_URL}/api/users`,{
         withCredentials: true
       })
       .then((res) => setUsers(res.data))
@@ -57,7 +58,7 @@ const UserManagement = () => {
   }, []);
 
   const handleDelete = async() => {
-    await axios.delete(`http://localhost:3000/api/deleteUsers/${deleteUserId}`, {
+    await axios.delete(`${API_MAIN_URL}/api/deleteUsers/${deleteUserId}`, {
       withCredentials: true
     })    
     .then(() => {
@@ -83,8 +84,8 @@ const UserManagement = () => {
   //   };
   
   //   const request = editingUser
-  //     ? axios.put(`http://localhost:3000/api/updateUsers`, payload, { withCredentials: true })
-  //     : axios.post("http://localhost:3000/api/users", formData, { withCredentials: true });
+  //     ? axios.put(`${API_MAIN_URL}/api/updateUsers`, payload, { withCredentials: true })
+  //     : axios.post("${API_MAIN_URL}/api/users", formData, { withCredentials: true });
   
   //   request
   //     .then(() => {
@@ -114,7 +115,7 @@ if (!validatePassword(password)) {
   setConfirmPassword('')
         return;
       }
- await axios.put(`http://localhost:3000/api/updatepassword`,
+ await axios.put(`${API_MAIN_URL}/api/updatepassword`,
   {id:passwordModal,password:password },
         { withCredentials: true}
 );
@@ -130,7 +131,7 @@ catch{
   const handleUpdate = async(e)=>{
 e.preventDefault()
 try{
- await axios.put(`http://localhost:3000/api/updateUsers`,
+ await axios.put(`${API_MAIN_URL}/api/updateUsers`,
   {id:editModal,display_name:uname,email:uemail,specialty:uspecialty,role:urole,praction:upraction },
   { withCredentials: true}
 );
@@ -147,7 +148,7 @@ catch{
 e.preventDefault()
 try{
   const date = moment().format('YYYY-MM-DD HH:mm:ss');
-  await axios.post(`http://localhost:3000/api/addUsers`,
+  await axios.post(`${API_MAIN_URL}/api/addUsers`,
 {name,specialty,role,praction,email,date},
 { withCredentials: true})
 fetchUsers();

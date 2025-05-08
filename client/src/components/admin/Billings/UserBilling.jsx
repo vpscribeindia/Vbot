@@ -20,6 +20,7 @@ const UserBilling = () => {
   const [upedate, setuPackageEnd] = useState('');
   const [ulimit, setuLimit] = useState('');
   const [ustatus, setuStatus] = useState('');
+  const API_MAIN_URL = import.meta.env.VITE_API_URL;
   
   const onChangePackageType = (e) => {
     const selectedType = e.target.value;
@@ -48,7 +49,7 @@ const UserBilling = () => {
     setLoading(true);
     setError(null);
     axios
-      .get("http://localhost:3000/api/getUserBilling",{
+      .get(`${API_MAIN_URL}/api/getUserBilling`,{
         withCredentials: true
       })
       
@@ -71,7 +72,7 @@ const UserBilling = () => {
   const handleUpdate = async(e)=>{
     e.preventDefault()
     try{
-     await axios.put(`http://localhost:3000/api/updateUserBilling`,
+     await axios.put(`${API_MAIN_URL}/api/updateUserBilling`,
       {id:editModal,amount:uamount,payment_status:upstatus,status:ustatus,package_type:uptype,package_end_date:upedate,package_start_date:upsdate,usage_limit:ulimit,email:uemail,display_name:uname },
       { withCredentials: true}
     );

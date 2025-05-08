@@ -8,17 +8,18 @@ import UserLogTable from "./UserLogTable";
 
 const UserLogging = () => {
   const [users, setUsers] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  // const [modalOpen, setModalOpen] = useState(false);
+  // const [editingUser, setEditingUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [deleteUserId, setDeleteUserId] = useState(null);
+  // const [deleteUserId, setDeleteUserId] = useState(null);
+  const API_MAIN_URL = import.meta.env.VITE_API_URL;
 
   const fetchLoggingUsers = () => {
     setLoading(true);
     setError(null);
     axios
-      .get("http://localhost:3000/api/getLogging",{
+      .get(`${API_MAIN_URL}/api/getLogging`,{
         withCredentials: true
       })
       .then((res) => setUsers(res.data))
@@ -33,41 +34,41 @@ const UserLogging = () => {
     fetchLoggingUsers();
   }, []);
 
-  const handleDelete = () => {
-    axios
-      .delete(`http://localhost:3000/api/deleteUsers`,{
-        data: { id: deleteUserId },
+  // const handleDelete = () => {
+  //   axios
+  //     .delete(`${API_MAIN_URL}/api/deleteUsers`,{
+  //       data: { id: deleteUserId },
         
-      },{ withCredentials: true}
-    )
+  //     },{ withCredentials: true}
+  //   )
 
-      .then(() => {
-        fetchUsers();
-        toast.error("User Deleted");
-      })
-      .catch(() => toast.error("Failed to delete user."))
-      .finally(() => setDeleteUserId(null));
-  };
+  //     .then(() => {
+  //       fetchUsers();
+  //       toast.error("User Deleted");
+  //     })
+  //     .catch(() => toast.error("Failed to delete user."))
+  //     .finally(() => setDeleteUserId(null));
+  // };
 
-  const handleEdit = (user) => {
-    setEditingUser(user);
-    setModalOpen(true);
-  };
+  // const handleEdit = (user) => {
+  //   setEditingUser(user);
+  //   setModalOpen(true);
+  // };
 
-  const handleSave = (formData) => {
-    const request = editingUser
-      ? axios.put(`http://localhost:3000/api/updateUsers/${editingUser.id}`, formData)
-      : axios.post("http://localhost:3000/api/users", formData);
+  // const handleSave = (formData) => {
+  //   const request = editingUser
+  //     ? axios.put(`${API_MAIN_URL}/api/updateUsers/${editingUser.id}`, formData)
+  //     : axios.post(`${API_MAIN_URL}/api/users`, formData);
 
-    request
-      .then(() => {
-        fetchUsers();
-        setModalOpen(false);
-        setEditingUser(null);
-        toast.success(editingUser ? "User Edited" : "User Added");
-      })
-      .catch(() => showError("Failed to save user."));
-  };
+  //   request
+  //     .then(() => {
+  //       fetchUsers();
+  //       setModalOpen(false);
+  //       setEditingUser(null);
+  //       toast.success(editingUser ? "User Edited" : "User Added");
+  //     })
+  //     .catch(() => showError("Failed to save user."));
+  // };
 
 
 

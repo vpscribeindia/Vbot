@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import GoogleLogo from "../assets/google.png";
-import Logo from "../assets/logo.png";
+import Logo from "../assets/Logo.png";
 import WholeBG from "../assets/bg.png";
 import SignBG from "../assets/leftimg.png";
 import { toast } from "react-toastify";

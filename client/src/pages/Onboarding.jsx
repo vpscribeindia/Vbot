@@ -14,7 +14,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
-import Logo from "../assets/logo.png";
+import Logo from "../assets/Logo.png";
 import OnBoard from "../assets/onboard.png";
 import OnBoardGalaxy from "../assets/onboardgalaxy.png";
 import { useNavigate } from "react-router-dom";

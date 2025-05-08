@@ -61,7 +61,7 @@ const Header = ({ variant, sidebarOpen }) => {
 
   const fetchUsers = () => {
     axios
-      .get("http://localhost:3000/api/usersId", { withCredentials: true })
+      .get(`${API_MAIN_URL}/api/usersId`, { withCredentials: true })
       .then((res) => {
         const data = res.data;
         setUser({
@@ -79,7 +79,7 @@ const Header = ({ variant, sidebarOpen }) => {
 
   const fetchRole = () => {
     axios
-      .get("http://localhost:3000/api/usersId", { withCredentials: true })
+      .get(`${API_MAIN_URL}/api/usersId`, { withCredentials: true })
       .then((res) => {
         const data = res.data;
         setUserrole(data.User.role||"");
@@ -115,7 +115,7 @@ const Header = ({ variant, sidebarOpen }) => {
 
   const handleSave = async () => {
     try {
-      await axios.put("http://localhost:3000/api/updateProfileUsers", editUser, {
+      await axios.put(`${API_MAIN_URL}/api/updateProfileUsers`, editUser, {
         withCredentials: true,
       });
       console.log(editUser);
