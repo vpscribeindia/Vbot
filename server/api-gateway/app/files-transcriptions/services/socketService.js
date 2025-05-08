@@ -4,19 +4,39 @@ const { socketAuth } = require('../../../middlewares/authHandler');
 
 function setupSocket(io) {
   io.use(socketAuth);
-  subscriber.subscribe('progress', 'progress_transcript', (err) => {
-    if (err) console.error('Redis subscribe error:', err);
-  });
 
-  subscriber.on('message', (channel, message) => {
-    try {
-      const data = JSON.parse(message);
-      io.emit(channel, data);
-    } catch (err) {
-      console.error(`Error parsing ${channel} message:`, err);
+  io.on('connection', (socket) => {
+    const userId = socket.user?.id; 
+    if (userId) {
+      socket.join(userId);
+      socket.on('disconnect', () => {});
+    } else {
+      socket.disconnect(true);  
     }
   });
 
+  subscriber.psubscribe('progress:*', 'progress_transcript:*', (err) => {
+    if (err) {
+      console.error('Redis psubscribe error:', err);
+    }
+  });
+
+
+  subscriber.on('pmessage', (pattern, channel, message) => {
+    try {
+      const [, userId] = channel.split(':'); 
+      const data = JSON.parse(message);
+
+      io.to(userId).emit(
+        channel.startsWith('progress_transcript') ? 'progress_transcript' : 'progress', 
+        data
+      );
+    } catch (err) {
+      console.error(`Error handling message from ${channel}:`, err);
+    }
+  });
+
+ 
   subscriber.on('error', (err) => {
     console.error('Redis error:', err);
   });

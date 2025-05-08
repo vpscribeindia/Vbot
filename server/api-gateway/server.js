@@ -6,6 +6,7 @@ const compression = require("compression");
 const cacheController = require("express-cache-controller");
 const cors = require("cors");
 const http = require('http');
+const path = require("path");
 const socketIo = require('socket.io');
 const fileRoutes = require('./app/files-transcriptions/routes/fileRoute');
 const transcriptRoutes = require('./app/files-transcriptions/routes/transcriptRoute');
@@ -45,7 +46,8 @@ const io = socketIo(server, {
 });
 
 // Middleware for JSON body parsing
-app.use(express.static("./app/files-transcriptions/uploads"));
+app.use(express.static(path.join(__dirname, '../../client/dist')));
+app.use(express.static(path.join(__dirname, './app/files-transcriptions/uploads')));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
@@ -80,7 +82,9 @@ app.use(errorHandler);
 
 // Initialize Socket.io with Redis pub/sub
 setupSocket(io);
-
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../client/dist', 'index.html'));
+});
 const PORT = process.env.PORT;
 server.listen(PORT, () => {
   console.log(`🚀 API-Gateway running on port ${PORT}`);

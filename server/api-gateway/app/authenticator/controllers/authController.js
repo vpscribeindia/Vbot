@@ -76,6 +76,7 @@ const myToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
 
     // Set HTTP-only cookie
     res.cookie('accessToken', myToken, {
+      path: '/',
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
@@ -159,6 +160,7 @@ expiresIn: '24h',
 });
 
       res.cookie('accessToken', token, {
+        path: '/',
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // set true if https
           sameSite: 'strict',

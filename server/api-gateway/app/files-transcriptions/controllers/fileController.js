@@ -73,7 +73,8 @@ async function uploadFile(req, res, next) {
       filePath: path,
       actualDuration: actualDuration,
       patientName: patientName,
-      template_name: templateName
+      template_name: templateName,
+      userId: userId
     };
 
     await addFileJob(jobData);

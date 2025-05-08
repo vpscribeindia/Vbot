@@ -9,32 +9,32 @@ const redisPub = require('./config/redis');
 const { File, Transcript, Template } = require('./config/db');
 
 async function processJob(job) {
-  const { filePath, fileId, actualDuration, patientName, template_name } = job.data;
+  const { filePath, fileId, actualDuration, patientName, template_name, userId } = job.data;
   let convertedFilePath, finalTranscript;
 
   try {
-    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Converting audio' }));
+    redisPub.publish(`progress:${userId}`, JSON.stringify({ fileId:fileId, status: 'Converting audio' }));
     convertedFilePath = await highQualityAudio(filePath);
 
-    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Audio conversion complete' }));
+    redisPub.publish(`progress:${userId}`, JSON.stringify({ fileId:fileId, status: 'Audio conversion complete' }));
     const {rawTranscript, conversationTranscript} = await transcribeAudio(convertedFilePath, process.env.DEEPGRAM_API_KEY);
-    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Transcription complete' }));
+    redisPub.publish(`progress:${userId}`, JSON.stringify({ fileId:fileId, status: 'Transcription complete' }));
     await File.update({ status: 'processing' }, { where: { id: fileId } });
 
-    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
+    redisPub.publish(`progress:${userId}`, JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
     const template = await Template.findOne({ where: { templateName: template_name } });
 
     finalTranscript = await templateTranscript(rawTranscript,template, process.env.GEMINI_API_KEY);
 
-    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Compressing Audio' }));
+    redisPub.publish(`progress:${userId}`, JSON.stringify({ fileId:fileId, status: 'Compressing Audio' }));
     const compressedFile = await compressAudio(convertedFilePath);
     const fileName = Path.basename(compressedFile);
 
-    redisPub.publish('progress', JSON.stringify({ fileId:fileId, status: 'Saving Audio' }));
+    redisPub.publish(`progress:${userId}`, JSON.stringify({ fileId:fileId, status: 'Saving Audio' }));
     await File.update({ fileName:fileName, duration: actualDuration, status: 'completed' }, { where: { id: fileId } });
     await Transcript.create({ fileId:fileId, patientName:patientName, content: finalTranscript, rawContent: rawTranscript, conversationContent: conversationTranscript, templateId: template.id });
 
-    redisPub.publish('progress', JSON.stringify({
+    redisPub.publish(`progress:${userId}`, JSON.stringify({
       fileId:fileId,
       status: 'completed',
       duration: actualDuration,
@@ -50,7 +50,7 @@ async function processJob(job) {
 }
 
 async function processTranscriptionJob(job) {
-  const { fileId, template_name } = job.data;
+  const { fileId, template_name,userId } = job.data;
   try {
   const existing = await Transcript.findOne({ where: { fileId } });
   if (!existing) throw new Error(`No transcript found for fileId ${fileId}`);
@@ -58,7 +58,7 @@ async function processTranscriptionJob(job) {
   const template = await Template.findOne({ where: { templateName: template_name } });
   if (!template) throw new Error(`Template ${template_name} not found`);
 
-  redisPub.publish('progress_transcript', JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
+  redisPub.publish(`progress_transcript:${userId}`, JSON.stringify({ fileId:fileId, status: 'Formatting transcript' }));
 
   const formatted = await templateTranscript(
     existing.rawContent,
@@ -66,14 +66,14 @@ async function processTranscriptionJob(job) {
     process.env.GEMINI_API_KEY
   );
 
-  redisPub.publish('progress_transcript', JSON.stringify({ fileId:fileId, status: 'Updating transcript' }));
+  redisPub.publish(`progress_transcript:${userId}`, JSON.stringify({ fileId:fileId, status: 'Updating transcript' }));
 
   await Transcript.update(
     { content: formatted, templateId: template.id },
     { where: { fileId } }
   );
 
-  redisPub.publish('progress_transcript', JSON.stringify({
+  redisPub.publish(`progress_transcript:${userId}`, JSON.stringify({
     fileId:fileId,
     status: 'completed'
   }));

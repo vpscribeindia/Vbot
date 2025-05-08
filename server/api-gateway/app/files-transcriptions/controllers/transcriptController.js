@@ -72,7 +72,8 @@ async function reFormatTranscript(req, res, next) {
 
     const jobData = {
       fileId: fileId,
-      template_name: templateName
+      template_name: templateName,
+      userId: userId
     };
 
     await addTranscriptJob(jobData);
