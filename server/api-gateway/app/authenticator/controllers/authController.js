@@ -87,43 +87,45 @@ const myToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
     if (isNewUser) {
         return res.redirect(`${process.env.FRONTEND_URL}#/onboarding`);
       } else {
-                const formattedDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
-              const user1 = await EmailStatus.findOne({
-                attributes: ['user_id'],
-                where: { user_id: user.id },})
+        //         const formattedDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+        //                      const userdetails  = await User.findOne({
+        //         where: { id: user.id },
+        //         attributes: ['role','status'],
+        //       });
+        //       const user1 = await EmailStatus.findOne({
+        //         attributes: ['user_id'],
+        //         where: { user_id: user.id }})
         
-                      if(user1){
-                const existingStatus  = await EmailStatus.findOne({
-                  where: { user_id: user.id },
-                  attributes: ['date'],
-                });
+        //     if(userdetails.status == "active"){
+        //               if(user1.user_id){
+        //         const existingStatus  = await EmailStatus.findOne({
+        //           where: { user_id: user.id },
+        //           attributes: ['date'],
+        //         });
                 
-                if (existingStatus) {
-                  // const todayDate = moment().format('YYYY-MM-DD');
-                  // const oldDate = moment(existingStatus.date).format('YYYY-MM-DD');
-                   const todayDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
-                  const oldDate =moment.utc(existingStatus.date).local().format('YYYY-MM-DD HH:mm:ss');
-                 if(oldDate !== todayDate ){
-                  const updated = await EmailStatus.update(
-                    { date:todayDate, status:'notsent' },
-                    { where: { user_id: user.id } }
-                  );
-                 }
-              }}
+        //         if (existingStatus) {
+        //           // const todayDate = moment().format('YYYY-MM-DD');
+        //           // const oldDate = moment(existingStatus.date).format('YYYY-MM-DD');
+        //            const todayDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+        //           const oldDate =moment.utc(existingStatus.date).local().format('YYYY-MM-DD HH:mm:ss');
+        //          if(oldDate !== todayDate ){
+        //           const updated = await EmailStatus.update(
+        //             { date:todayDate, status:'notsent' },
+        //             { where: { user_id: user.id } }
+        //           );
+        //          }
+        //       }}}
         
-        // logging and monitoring
-                const userdetails  = await User.findOne({
-                where: { id: user.id },
-                attributes: ['role','status'],
-              });
-              if(userdetails.status == "active"){
-              await Logging_Monitoring.create({
-                user_id:user.id,
-                date:formattedDate,
-                activity:'login successfully',
-                role:userdetails.role
-              });
-            }
+        // // logging and monitoring
+   
+        //       if(userdetails.status == "active"){
+        //       await Logging_Monitoring.create({
+        //         user_id:user.id,
+        //         date:formattedDate,
+        //         activity:'login successfully',
+        //         role:userdetails.role
+        //       });
+        //     }
         return res.redirect(`${process.env.FRONTEND_URL}#/dashboard`);
       }
 
@@ -211,7 +213,7 @@ expiresIn: '24h',
             });
             const user1 = await EmailStatus.findOne({
               attributes: ['user_id'],
-              where: { user_id: user.id },})
+              where: { user_id: user.id }})
               // const user2 = await User.findOne({
               //   attributes: ['status','role'],
               //   where: { id: user.id },})
@@ -242,8 +244,7 @@ expiresIn: '24h',
             }}
           }
             // logging and monitoring
-      
-      
+    
             if(userdetails.status == "active"){
             await Logging_Monitoring.create({
               user_id:user.id,
