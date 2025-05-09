@@ -22,27 +22,27 @@ const UserBilling = () => {
   const [ustatus, setuStatus] = useState('');
   const API_MAIN_URL = import.meta.env.VITE_API_URL;
   
-  const onChangePackageType = (e) => {
-    const selectedType = e.target.value;
-    setuPackageType(selectedType);
+  // const onChangePackageType = (e) => {
+  //   const selectedType = e.target.value;
+  //   setuPackageType(selectedType);
 
-    let limit = '';
-    switch (selectedType) {
-      case 'basic':
-        limit = 10200;
-        break;
-      case 'standard':
-        limit = 30000;
-        break;
-      case 'premium':
-        limit = 99999;
-        break;
-      default:
-        limit = 0;
-    }
+  //   let limit = '';
+  //   switch (selectedType) {
+  //     case 'basic':
+  //       limit = 10200;
+  //       break;
+  //     case 'standard':
+  //       limit = 30000;
+  //       break;
+  //     case 'premium':
+  //       limit = 99999;
+  //       break;
+  //     default:
+  //       limit = 0;
+  //   }
 
-    setuLimit(limit);
-  };
+  //   setuLimit(limit);
+  // };
 
 
   const fetchBillingUsers = () => {
@@ -141,7 +141,7 @@ const UserBilling = () => {
     onChangeEmail={(e) => setuEmail(e.target.value)}
     onChangeAmount={(e) => setuAmount(e.target.value)}
     onChangePaymentStatus={(e) => setuPaymentStatus(e.target.value)}
-    onChangePackageType={onChangePackageType}
+    onChangePackageType={(e) => setuPackageType(e.target.value)}
     onChangePackageStart={(e) => setuPackageStart(e.target.value)}
     onChangePackageEnd={(e) => setuPackageEnd(e.target.value)}
     onChangeLimit={(e) => setuLimit(e.target.value)}

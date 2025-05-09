@@ -175,6 +175,8 @@ const Dashboard = () => {
         const response = await axios.get(GET_ALL_TEMPLATE_URL, { withCredentials: true });
         const response1 = await axios.get(`${API_MAIN_URL}/api/getBillingByMinutes`, { withCredentials: true });
         const minutes = convertTime(response1.data.usage_limit);
+
+
         setremainingMinutes(parseInt(response1.data.usage_limit) === 99999 ? "unlimited" : minutes);
         setJobStatuses(data);
         const list = response.data.templateNames || [];
@@ -218,6 +220,11 @@ const Dashboard = () => {
     };
   }, []);
 
+
+
+  // async ()=>{
+  //   }
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) setSelectedFiles([file]);
@@ -248,6 +255,75 @@ const Dashboard = () => {
       setUploadStatus("Upload successful!");
       setSelectedFiles([]);
       setPatientName("");
+
+      // Check logging
+      
+            try {
+              const formatted = moment().format('YYYY-MM-DD HH:mm:ss');
+              const activity = 'transcription done';
+              await axios.post(`${API_MAIN_URL}/api/createLogging`, {
+                date: formatted,
+                activity: activity
+              }, {
+                withCredentials: true
+              });
+            } catch (error) {
+              console.error("Logging error:",error.message);
+            }
+
+
+            // Checking Email Status
+      const response10 = await axios.get(`${API_MAIN_URL}/api/getBillingByMinutes`, { withCredentials: true });
+      const minutes1 = convertTime(response10.data.usage_limit);
+       const convertedMinutes = extractMinutes(minutes1);
+      if (convertedMinutes <= 10) {
+            try{
+              const response5 = await axios.get(`${API_MAIN_URL}/api/getemailstatus`,{
+        withCredentials: true,
+              });
+              const emailstatus = response5.data.status;
+    if(emailstatus == 'notsent'){
+    let tomail= '';
+    try{
+       const response5 = await axios.get(`${API_MAIN_URL}/api/emailfind`,{
+        withCredentials: true,
+      })
+      tomail =  response5.data.email.User.email;
+    }
+    catch(error){
+      console.error("Error in date :", error);
+    }
+          if (convertedMinutes <= 10) {
+            try {
+              await axios.post(`${API_MAIN_URL}/api/sendemail`, {
+                
+                to: tomail,
+                subject: 'Plan Upgrade',
+                text: `Your plan will expire soon. Only ${minutes1} remaining. Please upgrade.`,
+              });
+    
+      try{
+     await axios.put(`${API_MAIN_URL}/api/updatestatus`, 
+          { status: 'sent' }, 
+          { withCredentials: true }
+        );
+      }catch(error){
+        console.error("Error updating status :", error);
+    
+      }
+              
+            } catch (err) {
+              console.error(err);
+    
+            }
+          }
+        }
+      }catch(error){
+        console.error("Error in status :", error);
+      }
+    }
+
+
     } catch (error) {
       console.error("Error uploading files:", error);
       setUploadStatus("Upload failed. Please try again.");
@@ -284,6 +360,8 @@ const Dashboard = () => {
     } catch (error) {
       console.error("Error accessing microphone:", error);
     }
+
+            
   };
 
   const getAccurateDuration = (blob) => {
@@ -328,6 +406,19 @@ const Dashboard = () => {
         console.error("Error uploading recording:", error);
       }
     };
+      // check logging
+      try {
+        const formatted = moment().format('YYYY-MM-DD HH:mm:ss');
+        const activity = 'voice recorded done';
+        await axios.post(`${API_MAIN_URL}/api/createLogging`, {
+          date: formatted,
+          activity: activity
+        }, {
+          withCredentials: true
+        });
+      } catch (error) {
+        console.error("Logging error:", error);
+      }
   };
 
   const handleDelete = async (fileId) => {
@@ -352,6 +443,16 @@ const Dashboard = () => {
     if (minutes > 0) result.push(`${minutes} min`);
     if (remainingSeconds > 0) result.push(`${remainingSeconds} sec`);
     return result.join(" ");
+  };
+
+  const extractMinutes = (timeStr) => {
+    const hrMatch = timeStr.match(/(\d+)\s*hr/);
+    const minMatch = timeStr.match(/(\d+)\s*min/);
+  
+    const hours = hrMatch ? parseInt(hrMatch[1], 10) : 0;
+    const minutes = minMatch ? parseInt(minMatch[1], 10) : 0;
+  
+    return hours * 60 + minutes;
   };
 
   const parseJSONTranscript = (flattenedTranscript) => {

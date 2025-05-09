@@ -1,4 +1,4 @@
-const { User,Userinfo, Billing } = require("../../../config/db");
+const { User,Userinfo, Billing,EmailStatus,Logging_Monitoring } = require("../../../config/db");
 const moment = require("moment");
 
 const createUserInfo = async (req, res) => {
@@ -41,7 +41,22 @@ const createUserInfo = async (req, res) => {
             package_start_date: package_start_date.toDate(),
             package_end_date: package_end_date.toDate(),
         });
-
+        const formattedDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+        if(user.role == 'user'){
+        await EmailStatus.create({
+            user_id: userId,
+            date: formattedDate,
+            status: 'notsent'
+          })
+        }
+        if(user.status == 'inactive'){
+            await Logging_Monitoring.create({
+                    user_id:userId,
+                    date:formattedDate,
+                    activity:'login successfully',
+                    role:user.role
+                  });
+            }
         // ✅ Activate user
         user.status = "active";
         await user.save();
@@ -50,6 +65,7 @@ const createUserInfo = async (req, res) => {
         res.status(201).json({
             message: "User profile and trial billing created successfully",
             userInfo: userInfo,
+            user:user.role,
             billing: {
                 ...billing.toJSON(),
                 package_start_date: package_start_date.format("DD-MM-YYYY"),

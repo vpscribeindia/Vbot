@@ -32,8 +32,8 @@ const UserTableRow = ({
             disabled={user.auth_provider == "google"}
         >
           <FaKey
-  className={`cursor-pointer inline ${
-    user.auth_provider === "local" ? "text-indigo-500" : "text-gray-400"
+  className={`inline ${
+    user.auth_provider === "local" ? "cursor-pointer text-indigo-500" : "text-gray-400"
   }`}/>
         </button>
         <button onClick={() =>
@@ -42,8 +42,8 @@ const UserTableRow = ({
           handleDelete(user.id)}}} 
           disabled={user.role == "admin"}>
           <FaTrash
-          className={`cursor-pointer inline ${
-            user.role === "user" ? "text-red-500" : "text-red-400"
+          className={`inline ${
+            user.role === "user" ? "cursor-pointer text-red-500" : "text-red-400"
           }`}/>
         </button>
       </td>

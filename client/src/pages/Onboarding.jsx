@@ -100,8 +100,16 @@ const OnboardingUI = () => {
         withCredentials: true,
       });
       console.log(name,specialty,role,clinicianCount);
-      toast.success(response.data.message || "Registration successful!");
-      navigate("/dashboard");
+      // toast.success(response.data.message || "Registration successful!");
+      // navigate("/dashboard");
+            if (response.data.user === "admin") {
+              toast.success("Login successfully!");
+              navigate("/admin");
+            } else {
+              toast.success(response.data.message);
+              navigate("/dashboard");
+            }
+      
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(error.response.data.message || "An error occurred.");

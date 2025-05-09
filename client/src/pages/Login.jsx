@@ -44,12 +44,14 @@ const handleSubmit= async (e)=>{
       }); 
   
       const userRole = response.data.role;  
+      const userStatus = response.data.status;  
 
-      if (userRole === "admin") {
+        navigate("/onboarding");
+      if (userRole === "admin" && userStatus === "active") {
         toast.success("Login successfully!");
         navigate("/admin");
-      } else {
-        toast.success("Login successfully!");
+      } else if (userRole === "user" && userStatus === "active") {
+        toast.success("Login successfully");
         navigate("/dashboard");
       }
       } catch (err) {

@@ -1,8 +1,9 @@
 const axios = require('axios');
 const jwt = require('jsonwebtoken');
-const { User } = require('../../../config/db');
+const { User,EmailStatus,Logging_Monitoring } = require('../../../config/db');
 const qs = require('querystring');
 const bcrypt = require("bcrypt");
+const moment = require('moment');
 
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -86,6 +87,43 @@ const myToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
     if (isNewUser) {
         return res.redirect(`${process.env.FRONTEND_URL}#/onboarding`);
       } else {
+                const formattedDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+              const user1 = await EmailStatus.findOne({
+                attributes: ['user_id'],
+                where: { user_id: user.id },})
+        
+                      if(user1){
+                const existingStatus  = await EmailStatus.findOne({
+                  where: { user_id: user.id },
+                  attributes: ['date'],
+                });
+                
+                if (existingStatus) {
+                  // const todayDate = moment().format('YYYY-MM-DD');
+                  // const oldDate = moment(existingStatus.date).format('YYYY-MM-DD');
+                   const todayDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+                  const oldDate =moment.utc(existingStatus.date).local().format('YYYY-MM-DD HH:mm:ss');
+                 if(oldDate !== todayDate ){
+                  const updated = await EmailStatus.update(
+                    { date:todayDate, status:'notsent' },
+                    { where: { user_id: user.id } }
+                  );
+                 }
+              }}
+        
+        // logging and monitoring
+                const userdetails  = await User.findOne({
+                where: { id: user.id },
+                attributes: ['role','status'],
+              });
+              if(userdetails.status == "active"){
+              await Logging_Monitoring.create({
+                user_id:user.id,
+                date:formattedDate,
+                activity:'login successfully',
+                role:userdetails.role
+              });
+            }
         return res.redirect(`${process.env.FRONTEND_URL}#/dashboard`);
       }
 
@@ -165,7 +203,56 @@ expiresIn: '24h',
           secure: process.env.NODE_ENV === 'production', // set true if https
           sameSite: 'strict',
           maxAge: 3600000, // 1 hour
-      }).json({ message: 'Login successful',role:user.role });
+      });
+      const formattedDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+                  const userdetails  = await User.findOne({
+              where: { id: user.id },
+              attributes: ['role','status'],
+            });
+            const user1 = await EmailStatus.findOne({
+              attributes: ['user_id'],
+              where: { user_id: user.id },})
+              // const user2 = await User.findOne({
+              //   attributes: ['status','role'],
+              //   where: { id: user.id },})
+            // if(!user1 && user2.status == 'active' && user2.role == 'user'){
+            // await EmailStatus.create({
+            //   user_id: user.id,
+            //   date: formattedDate,
+            //   status: 'notsent'
+            // });}
+            if(userdetails.status == "active"){
+      
+            if(user1.user_id){
+              const existingStatus  = await EmailStatus.findOne({
+                where: { user_id: user.id },
+                attributes: ['date'],
+              });
+              
+              if (existingStatus) {
+                const todayDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
+                const oldDate =moment.utc(existingStatus.date).local().format('YYYY-MM-DD HH:mm:ss');
+               if(oldDate !== todayDate ){
+                const updated = await EmailStatus.update(
+                  { date:todayDate,status:'notsent'},
+                  { where: { user_id: user.id } }
+                );
+               }
+      
+            }}
+          }
+            // logging and monitoring
+      
+      
+            if(userdetails.status == "active"){
+            await Logging_Monitoring.create({
+              user_id:user.id,
+              date:formattedDate,
+              activity:'login successfully',
+              role:userdetails.role
+            });
+          }
+          return res.json({ message: 'Login successful',role:user.role,status:user.status});
       // res.status(200).json({ message: "Login successful", token });
   } catch (error) {
       console.error("Login Error:", error);

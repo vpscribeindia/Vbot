@@ -11,10 +11,16 @@ const createLogging = async (req, res) => {
     const userId = req.user.id;
       const  {date,activity}  = req.body;
       const formattedDate = moment.utc(date).local().format('YYYY-MM-DD HH:mm:ss');
+
+        const userdetails  = await User.findOne({
+              where: { id: userId },
+              attributes: ['role'],
+            });
       const add =await Logging_Monitoring.create({
         user_id:userId,
         date:formattedDate,
-        activity:activity
+        activity:activity,
+        role:userdetails.role
       });
       
       return res.status(201).json({ message : add});
@@ -31,7 +37,7 @@ const getLoggingUsers = async (req, res) => {
         include: [
           {
             model: User,
-            attributes: ['email'],
+            attributes: ['email','role'],
             include: [{
               model: Userinfo,
               attributes: ['display_name']

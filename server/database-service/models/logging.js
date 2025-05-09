@@ -14,9 +14,12 @@ const Logging_Monitoring = sequelize.define("Logging_Monitoring", {
         allowNull: false,
     },
 activity: {
-        type: DataTypes.ENUM("logined", "transcribed","recorded"),
+        type: DataTypes.ENUM("login successfully", "transcription done","voice recorded done"),
     },
-
+    role: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
 
 });
 module.exports = Logging_Monitoring;
