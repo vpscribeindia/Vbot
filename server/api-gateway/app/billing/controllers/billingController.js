@@ -99,21 +99,28 @@ const updateBilling = async (req, res) => {
         daysToAdd = 60;
         break;
       case "premium":
-        additionalUsage = 99999;
+        additionalUsage = 99999; // For uniformity; will be overridden below
         daysToAdd = 90;
         break;
       default:
-        additionalUsage = 0;
-        daysToAdd = 0;
+        return res.status(400).json({ message: "Invalid package type" });
     }
 
-    const currentUsage = parseInt(billing.usage_limit, 10) || 0;
-    const newUsageLimit =
-      pakage_type === "premium"
-        ? 99999 // override for unlimited
-        : currentUsage + additionalUsage;
+    const currentPackage = billing.pakage_type;
+    let newUsageLimit;
 
-    // ✅ Calculate new end date
+    if (pakage_type === "premium") {
+      newUsageLimit = 99999; // Override for unlimited
+    } else if (currentPackage === "premium") {
+      // Downgrading from premium — reset usage
+      newUsageLimit = additionalUsage;
+    } else {
+      // Same or upgrade/downgrade within basic/standard — add to existing
+      const currentUsage = parseInt(billing.usage_limit, 10) || 0;
+      newUsageLimit = currentUsage + additionalUsage;
+    }
+
+    // Calculate new end date
     const currentDate = new Date();
     let newEndDate = new Date(currentDate);
     newEndDate.setDate(newEndDate.getDate() + daysToAdd);
@@ -121,7 +128,7 @@ const updateBilling = async (req, res) => {
     await billing.update({
       pakage_type,
       usage_limit: newUsageLimit,
-      package_end_date: newEndDate.toISOString(), 
+      package_end_date: newEndDate.toISOString(),
     });
 
     res.status(200).json({
