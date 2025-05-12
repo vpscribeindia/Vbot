@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import RobotLogo from "../../assets/Logo.png";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,useLocation } from "react-router-dom";
 import BillingPopup from "../Bill";
+import { TbDeviceDesktopAnalytics } from "react-icons/tb";
+import { MdManageAccounts } from "react-icons/md";
 import {
   Dialog,
   DialogTitle,
@@ -20,6 +22,7 @@ import {
 const API_MAIN_URL = import.meta.env.VITE_API_URL;
 
 const Header = ({ variant, sidebarOpen }) => {
+  const location = useLocation();
   const navigate = useNavigate();
   const leftClass =
   variant === "user"
@@ -128,7 +131,26 @@ const Header = ({ variant, sidebarOpen }) => {
       toast.error("Failed to update profile.");
     }
   };
-
+const handleSwitch = () => {
+    if (location.pathname === '/dashboard') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
+  };
+const getButtonLabel = () => {
+  return location.pathname === '/dashboard' ? (
+    <>
+      <TbDeviceDesktopAnalytics className="inline-block mr-1 text-xl cursor-pointer" />
+      Switch to Admin
+    </>
+  ) : (
+    <>
+  <MdManageAccounts  className="inline-block mr-1 text-xl cursor-pointer" />
+      Switch to Dashboard
+    </>
+  );
+};
   return (
     <nav className={`fixed top-0 ${leftClass} right-0 z-50 ${baseClasses} ${bgClass}`}>
       <div className="flex items-center justify-between px-4 py-3">
@@ -137,7 +159,17 @@ const Header = ({ variant, sidebarOpen }) => {
           <img src={RobotLogo} alt="Logo" className="h-10" />
           <span className="text-2xl font-semibold dark:text-white">VBOT AI</span>
         </div>
+ <div className="text-white ml-auto me-20">
+      {userrole === 'admin' && (
+<button
+  onClick={handleSwitch}
+  className="flex items-center gap-2 px-4 py-1.5 bg-white text-gray-800 font-semibold rounded-lg shadow hover:bg-gray-100 hover:text-blue-600 transition duration-200 cursor-pointer"
+>
+  {getButtonLabel()}
+</button>
 
+      )}
+    </div>
         {/* User Avatar & Dropdown */}
         <div
       className="relative"

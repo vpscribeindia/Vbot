@@ -20,7 +20,8 @@ const UserLogTable = ({users}) => {
         lengthMenu: "Show _MENU_ per page",
         info: "Showing _START_ to _END_ of _TOTAL_ data",
         zeroRecords: "No matching data found",
-      }
+      },
+        order: [[0, "DESC"]]
     });
     
 
