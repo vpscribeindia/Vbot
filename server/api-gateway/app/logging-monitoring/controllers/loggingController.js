@@ -37,7 +37,7 @@ const getLoggingUsers = async (req, res) => {
         include: [
           {
             model: User,
-            attributes: ['email','role'],
+            attributes: ['email'],
             include: [{
               model: Userinfo,
               attributes: ['display_name']

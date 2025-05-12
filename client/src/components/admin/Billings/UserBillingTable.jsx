@@ -14,14 +14,12 @@ const UserBillingTable = ({ billingusers,onEdit }) => {
       destroy: true,
       responsive: true,
       dom: '<"flex justify-between items-center mb-2"lf>rt<"flex justify-between items-center mt-2"ip>',
+      pageLength: 5,
+      lengthMenu: [5, 10, 25, 50, 100],
       language: {
         search: "🔍 Search:",
         lengthMenu: "Show _MENU_ billing users per page",
         info: "Showing _START_ to _END_ of _TOTAL_ billing users",
-        paginate: {
-          next: "➡️",
-          previous: "⬅️"
-        },
         zeroRecords: "No matching billing users found",
       }
     });

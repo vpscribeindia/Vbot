@@ -52,7 +52,7 @@ const getBillingById = async (req, res) => {
           return res.status(401).json({ error: "Unauthorized: Missing user ID" });
         }
         const userId = req.user.id;
-    const billing = await Billing.findOne({where:{user_id:userId},attributes:['pakage_type']});
+    const billing = await Billing.findOne({where:{user_id:userId},attributes:['pakage_type','package_end_date']});
     if (!billing) return res.status(404).json({ message: "Billing not found" });
     res.status(200).json(billing);
   } catch (error) {
@@ -82,32 +82,53 @@ const updateBilling = async (req, res) => {
   try {
     const userId = req.user.id;
     const billing = await Billing.findOne({ where: { user_id: userId } });
+
     if (!billing) return res.status(404).json({ message: "Billing not found" });
+
     const { pakage_type } = req.body;
     let additionalUsage = 0;
+    let daysToAdd = 0;
+
     switch (pakage_type) {
       case "basic":
         additionalUsage = 10200;
+        daysToAdd = 30;
         break;
       case "standard":
         additionalUsage = 30000;
+        daysToAdd = 60;
         break;
       case "premium":
         additionalUsage = 99999;
+        daysToAdd = 90;
         break;
       default:
         additionalUsage = 0;
+        daysToAdd = 0;
     }
+
     const currentUsage = parseInt(billing.usage_limit, 10) || 0;
     const newUsageLimit =
       pakage_type === "premium"
         ? 99999 // override for unlimited
         : currentUsage + additionalUsage;
+
+    // ✅ Calculate new end date
+    const currentDate = new Date();
+    let newEndDate = new Date(currentDate);
+    newEndDate.setDate(newEndDate.getDate() + daysToAdd);
+
     await billing.update({
       pakage_type,
       usage_limit: newUsageLimit,
+      package_end_date: newEndDate.toISOString(), 
     });
-    res.status(200).json({ message: "Billing updated", billing });
+
+    res.status(200).json({
+      message: "Billing updated",
+      billing,
+      package_end_date: newEndDate.toISOString(),
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -161,27 +182,9 @@ const updateUserBilling = async (req, res) => {
       const {id,amount, payment_status,package_type,package_start_date,package_end_date,usage_limit,status,email,display_name } = req.body;
             const startDate = moment.utc(package_start_date).local().format('YYYY-MM-DD HH:mm:ss');
             const endDate = moment.utc(package_end_date).local().format('YYYY-MM-DD HH:mm:ss');
-    let additionalUsage = 0;
-    switch (package_type) {
-      case "basic":
-        additionalUsage = 10200;
-        break;
-      case "standard":
-        additionalUsage = 30000;
-        break;
-      case "premium":
-        additionalUsage = 99999;
-        break;
-      default:
-        additionalUsage = 0;
-    }
-        const currentUsage = parseInt(usage_limit, 10) || 0;
-    const newUsageLimit =
-      package_type === "premium"
-        ? 99999 
-        : currentUsage + additionalUsage;
+
       const updateUser = await Billing.update(
-          {amount:amount,payment_status:payment_status,status:status,pakage_type:package_type,package_end_date:endDate,package_start_date:startDate,usage_limit:newUsageLimit},
+          {amount:amount,payment_status:payment_status,status:status,pakage_type:package_type,package_end_date:endDate,package_start_date:startDate,usage_limit:usage_limit},
           { where: { user_id: id } }
       )
       const userInfo = await Billing.findOne({ where: { user_id: id } });

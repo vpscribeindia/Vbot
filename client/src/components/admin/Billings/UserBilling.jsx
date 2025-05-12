@@ -86,7 +86,7 @@ const UserBilling = () => {
     }
       }
   return (
-    <div className="p-1">
+    <div>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-3xl font-bold text-gray-800">User Billings</h2>
@@ -103,7 +103,7 @@ const UserBilling = () => {
       ) : billingusers.length === 0 ? (
         <p className="text-gray-500 italic">No billing data found.</p>
       ) : (
-        <div className="bg-white rounded-xl shadow-md p-4">
+        <div className="bg-white rounded-xl shadow-md">
           <UserBillingTable
             billingusers={billingusers}
             onEdit={(billingusers) => {
