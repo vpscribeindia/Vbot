@@ -1,0 +1,57 @@
+name: Deploy vbot to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
+
+      - name: Build frontend (client)
+        run: |
+          cd client
+          npm install
+          npm run build
+      - name: Copy backend files to EC2 (server)
+        run: |
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" server/ \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/server/
+      - name: Ensure client/dist directory exists on EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+          "mkdir -p ${{ secrets.EC2_APP_DIR }}/client/dist"
+      - name: Copy frontend dist files to EC2 (client/dist)
+        run: |
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" client/dist/ \
+          ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/client/dist/
+      - name: SSH into EC2, set env vars, and restart backend
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+            set -e
+            echo "Setting up frontend environment variables..."
+            echo "${{ secrets.CLIENT_ENV }}" > ${{ secrets.EC2_APP_DIR }}/client/.env.production
+            echo "Setting up backend environment variables..."
+            echo "${{ secrets.API_GATEWAY_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/api-gateway/.env
+            echo "${{ secrets.WORKER_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/worker-service/.env
+            echo "Installing backend dependencies..."
+            cd ${{ secrets.EC2_APP_DIR }}/server/api-gateway
+            npm install
+            cd ${{ secrets.EC2_APP_DIR }}/server/worker-service
+            npm install
+            echo "Restarting backend with PM2..."
+            sudo pm2 restart apigateway || sudo pm2 start server.js --name apigateway
+            sudo pm2 restart worker || sudo pm2 start worker.js --name worker
+            echo "Deployment complete."
+            sudo pm2 status
+          EOF
