@@ -47,11 +47,12 @@ jobs:
             echo "Installing backend dependencies..."
             cd ${{ secrets.EC2_APP_DIR }}/server/api-gateway
             npm install
+            echo "Restarting apigateway backend with PM2..."
+            sudo pm2 restart apigateway || sudo pm2 start server.js --name apigateway
             cd ${{ secrets.EC2_APP_DIR }}/server/worker-service
             npm install
-            echo "Restarting backend with PM2..."
-            sudo pm2 restart apigateway || sudo pm2 start server.js --name apigateway
-            sudo pm2 restart worker || sudo pm2 start worker.js --name worker
+            echo "Restarting worker backend with PM2..."
+            sudo pm2 restart worker || sudo pm2 start worker.js --name worker  
             echo "Deployment complete."
             sudo pm2 status
           EOF
