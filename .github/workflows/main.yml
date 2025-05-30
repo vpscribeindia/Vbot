@@ -45,6 +45,8 @@ jobs:
             echo "${{ secrets.API_GATEWAY_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/api-gateway/.env
             echo "${{ secrets.WORKER_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/worker-service/.env
             echo "Installing backend dependencies..."
+            cd ${{ secrets.EC2_APP_DIR }}/server/database-service
+            npm install
             cd ${{ secrets.EC2_APP_DIR }}/server/api-gateway
             npm install
             echo "Restarting apigateway backend with PM2..."
