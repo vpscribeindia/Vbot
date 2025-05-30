@@ -18,43 +18,58 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.EC2_SSH_KEY }}
 
+      - name: Inject .env.production for Vite
+        run: |
+          echo "${{ secrets.CLIENT_ENV }}" > client/.env.production
+
       - name: Build frontend (client)
         run: |
           cd client
           npm install
           npm run build
+
       - name: Copy backend files to EC2 (server)
         run: |
           rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" server/ \
           ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/server/
-      - name: Ensure client/dist directory exists on EC2
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-          "mkdir -p ${{ secrets.EC2_APP_DIR }}/client/dist"
+
       - name: Copy frontend dist files to EC2 (client/dist)
         run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "mkdir -p ${{ secrets.EC2_APP_DIR }}/client/dist"
           rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" client/dist/ \
           ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:${{ secrets.EC2_APP_DIR }}/client/dist/
-      - name: SSH into EC2, set env vars, and restart backend
+
+      - name: SSH into EC2, set env vars, install, and restart services
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
             set -e
-            echo "Setting up frontend environment variables..."
-            echo "${{ secrets.CLIENT_ENV }}" > ${{ secrets.EC2_APP_DIR }}/client/.env.production
-            echo "Setting up backend environment variables..."
-            echo "${{ secrets.API_GATEWAY_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/api-gateway/.env
-            echo "${{ secrets.WORKER_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/worker-service/.env
+            echo "Injecting environment variables..."
+            printf "%s\n" "${{ secrets.API_GATEWAY_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/api-gateway/.env
+            printf "%s\n" "${{ secrets.WORKER_ENV }}" > ${{ secrets.EC2_APP_DIR }}/server/worker-service/.env
+
             echo "Installing backend dependencies..."
             cd ${{ secrets.EC2_APP_DIR }}/server/database-service
             npm install
+
             cd ${{ secrets.EC2_APP_DIR }}/server/api-gateway
             npm install
-            echo "Restarting apigateway backend with PM2..."
-            sudo pm2 restart apigateway || sudo pm2 start server.js --name apigateway
+            if [ -f server.js ]; then
+              echo "Restarting apigateway..."
+              sudo pm2 restart apigateway || sudo pm2 start server.js --name apigateway
+            else
+              echo "server.js not found in api-gateway. Skipping restart."
+            fi
+
             cd ${{ secrets.EC2_APP_DIR }}/server/worker-service
             npm install
-            echo "Restarting worker backend with PM2..."
-            sudo pm2 restart worker || sudo pm2 start worker.js --name worker  
-            echo "Deployment complete."
+            if [ -f worker.js ]; then
+              echo "Restarting worker..."
+              sudo pm2 restart worker || sudo pm2 start worker.js --name worker
+            else
+              echo "worker.js not found in worker-service. Skipping restart."
+            fi
+
+            sudo pm2 save
             sudo pm2 status
+            echo "✅ Deployment complete."
           EOF
