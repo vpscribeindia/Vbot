@@ -8,7 +8,7 @@ const moment = require('moment');
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = `${process.env.REDIRECT_DOMAIN}:${process.env.PORT}/auth/google/callback`; 
+const REDIRECT_URI = `${process.env.REDIRECT_DOMAIN}/auth/google/callback`; 
 
 // Step 1: Redirect to Google Auth URL
 const googleAuth = (req, res) => {
@@ -81,7 +81,7 @@ const myToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 3600000, // 1h
+      maxAge: 86400000, // 24h
     });
 
     if (isNewUser) {
@@ -204,7 +204,7 @@ expiresIn: '24h',
           httpOnly: true,
           secure: process.env.NODE_ENV === 'production', // set true if https
           sameSite: 'strict',
-          maxAge: 3600000, // 1 hour
+           maxAge: 86400000, // 24 hour
       });
       const formattedDate = moment.utc(moment().format('YYYY-MM-DD HH:mm:ss')).local().format('YYYY-MM-DD HH:mm:ss');
                   const userdetails  = await User.findOne({
